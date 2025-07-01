@@ -22,6 +22,7 @@
 
 //Importar módulo express
 import express from 'express'
+import usuarioRoutes from './routes/usuarioRoutes.js';
 
 const app = express(); //Objeto 'app' com métodos do módulo express
 const PORT = 3000; //Porta do server
@@ -36,9 +37,10 @@ app.get ("/", function (req, res){
 })
 
 app.use('/api', usuarioRoutes);
+/*
 app.use('/api', doacaoRoutes);
 app.use('/api', ongRoutes);
 app.use('/api', avaliacaoRoutes);
 app.use('/api', relatorioRoutes);
-
+*/
 app.listen(PORT, () => console.log(`O servidor está rodando na porta ${PORT}, abra seu navegador e digite na url -> localhost:${PORT}`));
