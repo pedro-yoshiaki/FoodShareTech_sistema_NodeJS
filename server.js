@@ -23,24 +23,32 @@
 //Importar módulo express
 import express from 'express'
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import doacaoRoutes from './routes/doacaoRoutes.js';
+import ongRoutes from './routes/ongRoutes.js';
+import avaliacaoRoutes from './routes/avaliacaoRoutes.js';
+import relatorioRoutes from './routes/relatorioRoutes.js';
+
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express(); //Objeto 'app' com métodos do módulo express
 const PORT = 3000; //Porta do server
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+app.use(express.static(path.join(__dirname, 'view')));
 app.use(express.json()); //Tipo de dados que a rota vai manipular
 app.use(express.urlencoded({extended:false})); //Trabalhar com formulários HTML
 
 //Rota GET padrão
 app.get ("/", function (req, res){
-    res.write("Hello Mundo!");
+    res.write("API FoodShareTech Ativa!");
     res.end();
 })
 
 app.use('/api', usuarioRoutes);
-/*
 app.use('/api', doacaoRoutes);
 app.use('/api', ongRoutes);
 app.use('/api', avaliacaoRoutes);
 app.use('/api', relatorioRoutes);
-*/
+
 app.listen(PORT, () => console.log(`O servidor está rodando na porta ${PORT}, abra seu navegador e digite na url -> localhost:${PORT}`));
