@@ -23,6 +23,11 @@
 //Importar módulo express
 import express from 'express'
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import doacaoRoutes from './routes/doacaoRoutes.js';
+import ongRoutes from './routes/ongRoutes.js';
+import avaliacaoRoutes from './routes/avaliacaoRoutes.js';
+import relatorioRoutes from './routes/relatorioRoutes.js';
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -41,10 +46,9 @@ app.get ("/", function (req, res){
 })
 
 app.use('/api', usuarioRoutes);
-/*
 app.use('/api', doacaoRoutes);
 app.use('/api', ongRoutes);
 app.use('/api', avaliacaoRoutes);
 app.use('/api', relatorioRoutes);
-*/
+
 app.listen(PORT, () => console.log(`O servidor está rodando na porta ${PORT}, abra seu navegador e digite na url -> localhost:${PORT}`));

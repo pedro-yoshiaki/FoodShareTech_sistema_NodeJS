@@ -9,8 +9,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### ✅ Cadastro de Usuário (ONG ou Doador)
 
-- [cite_start]**Endpoint:** `POST /api/cadastro` [cite: 2, 5]
-- [cite_start]**Descrição:** Realiza o cadastro de um novo usuário no sistema, incluindo endereço e contatos. [cite: 5]
+- **Endpoint:** `POST /api/cadastro`
+- **Descrição:** Realiza o cadastro de um novo usuário no sistema, incluindo endereço e contatos.
 
 #### 📤 Requisição (application/json)
 
@@ -50,8 +50,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### 🔑 Login de Usuário
 
-  - [cite\_start]**Endpoint:** `POST /api/login` [cite: 2, 5]
-  - [cite\_start]**Descrição:** Autentica um usuário pelo e-mail e senha. [cite: 5]
+  - **Endpoint:** `POST /api/login`
+  - **Descrição:** Autentica um usuário pelo e-mail e senha.
 
 #### 📤 Requisição
 
@@ -87,8 +87,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### 🔍 Visualizar Perfil
 
-  - [cite\_start]**Endpoint:** `GET /api/usuarios/me` [cite: 5]
-  - [cite\_start]**Descrição:** Retorna os dados completos do usuário logado (identificado via token/sessão, mas no exemplo via query `?idOng=1`). [cite: 5]
+  - **Endpoint:** `GET /api/usuarios/me`
+  - **Descrição:** Retorna os dados completos do usuário logado (identificado via token/sessão, mas no exemplo via query `?idOng=1`).
 
 #### ✅ Respostas
 
@@ -117,8 +117,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### ✏️ Atualizar Perfil
 
-  - [cite\_start]**Endpoint:** `PUT /api/usuarios/me` [cite: 5]
-  - [cite\_start]**Descrição:** Atualiza informações do usuário logado. [cite: 5]
+  - **Endpoint:** `PUT /api/usuarios/me`
+  - **Descrição:** Atualiza informações do usuário logado.
 
 #### 📤 Requisição
 
@@ -148,8 +148,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### 🗑️ Deletar Conta
 
-  - [cite\_start]**Endpoint:** `DELETE /api/usuarios/me` [cite: 5]
-  - [cite\_start]**Descrição:** Remove o usuário logado e seus dados associados. [cite: 5]
+  - **Endpoint:** `DELETE /api/usuarios/me`
+  - **Descrição:** Remove o usuário logado e seus dados associados.
 
 #### ✅ Resposta
 
@@ -166,8 +166,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### ✋ Fazer Reivindicação (Dar Lance)
 
-  - [cite\_start]**Endpoint:** `POST /api/reivindicacoes` [cite: 2]
-  - [cite\_start]**Descrição:** Permite que uma ONG registrada faça um lance para reivindicar uma doação disponível. [cite: 2]
+  - **Endpoint:** `POST /api/reivindicacoes`
+  - **Descrição:** Permite que uma ONG registrada faça um lance para reivindicar uma doação disponível.
 
 #### 📤 Requisição (application/json)
 
@@ -197,8 +197,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### 📋 Visualizar Histórico de Reivindicações da ONG
 
-  - [cite\_start]**Endpoint:** `GET /api/ong/reivindicacoes` [cite: 2]
-  - **Descrição:** Retorna uma lista de todas as reivindicações (lances) que uma ONG específica já fez. [cite\_start]O ID da ONG deve ser passado como um parâmetro na URL. [cite: 2]
+  - **Endpoint:** `GET /api/ong/reivindicacoes`
+  - **Descrição:** Retorna uma lista de todas as reivindicações (lances) que uma ONG específica já fez. O ID da ONG deve ser passado como um parâmetro na URL.
   - **Exemplo de URL:** `/api/ong/reivindicacoes?idOng=1`
 
 #### 📤 Requisição
@@ -243,8 +243,8 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 
 ### ✅ Confirmar Coleta da Doação
 
-  - [cite\_start]**Endpoint:** `POST /api/reivindicacoes/:id/confirmar` [cite: 2]
-  - **Descrição:** Confirma que a doação referente a uma reivindicação vencedora foi coletada pela ONG. [cite\_start]O `:id` na URL deve ser o ID da **reivindicação**. [cite: 2]
+  - **Endpoint:** `POST /api/reivindicacoes/:id/confirmar`
+  - **Descrição:** Confirma que a doação referente a uma reivindicação vencedora foi coletada pela ONG. O `:id` na URL deve ser o ID da **reivindicação**.
   - **Exemplo de URL:** `/api/reivindicacoes/12/confirmar`
 
 #### 📤 Requisição
@@ -269,4 +269,105 @@ Observação: Todos os endpoints devem ser consumidos utilizando o Content-Type:
 }
 ```
 
+-----
 
+## ⭐ Avaliações
+
+### 📝 Registrar Avaliação de uma ONG
+
+  - **Endpoint:** `POST /api/avaliacoes`
+  - **Descrição:** Permite que um Doador envie uma avaliação (nota e comentário) para uma ONG após a coleta de uma doação.
+
+#### 📤 Requisição (application/json)
+
+```json
+{
+  "idDoador": 1,
+  "idOng": 3,
+  "nota": 5,
+  "comentario": "Processo de coleta muito organizado e equipe atenciosa."
+}
+```
+
+#### ✅ Respostas
+
+```json
+{
+  "success": true,
+  "message": "Avaliação registrada com sucesso!",
+  "idAvaliacao": 25
+}
+```
+
+```json
+{
+  "success": false,
+  "message": "ID do Doador, ID da ONG e a nota são obrigatórios."
+}
+```
+
+-----
+
+## 📊 Relatórios
+
+### 📈 Gerar Relatório de Histórico
+
+  - **Endpoint:** `GET /api/relatorios`
+  - **Descrição:** Retorna um relatório de histórico para um Doador ou uma ONG, dependendo dos parâmetros enviados na URL.
+
+#### 📤 Requisição
+
+  - **Parâmetros de URL:**
+      - `tipo` (obrigatório): O tipo de usuário para o relatório. Valores possíveis: `Doador` ou `ONG`.
+      - `id` (obrigatório): O ID do Doador ou da ONG.
+  - **Exemplo para Doador:** `/api/relatorios?tipo=Doador&id=1`
+  - **Exemplo para ONG:** `/api/relatorios?tipo=ONG&id=3`
+
+#### ✅ Respostas
+
+**Exemplo de Resposta para Doador:**
+
+```json
+{
+    "success": true,
+    "relatorio": [
+        {
+            "idDoacao": 5,
+            "dataDoacao": "2025-07-01T03:00:00.000Z",
+            "quantidadeDoacao": 100,
+            "statusDoacao": "Coletada",
+            "validade": "2025-12-31T03:00:00.000Z",
+            "nomeAlimento": "Arroz Integral 5kg",
+            "categoria": "Grãos"
+        }
+    ]
+}
+```
+
+**Exemplo de Resposta para ONG:**
+
+```json
+{
+    "success": true,
+    "relatorio": [
+        {
+            "idReivindicacao": 12,
+            "dataReivindicacao": "2025-07-02T06:45:00.000Z",
+            "statusReivindicacao": "Concluída",
+            "idDoacao": 5,
+            "statusDoacao": "Coletada",
+            "nomeAlimento": "Arroz Integral 5kg",
+            "nomeDoador": "Supermercado Exemplo"
+        }
+    ]
+}
+```
+
+**Exemplo de Resposta de Erro:**
+
+```json
+{
+    "success": false,
+    "message": "O tipo (Doador ou ONG) e o ID são obrigatórios."
+}
+```
