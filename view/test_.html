@@ -193,6 +193,10 @@
             <div class="continue-button">
                 <button type="submit">Enviar</button>
             </div>
+
+            <!-- Resposta do servidor-->
+            <div id="retornoServidor" class="alert mt-3" role="alert" style="display: none;"></div>
+
         </form>
     </div>
 </div>
@@ -245,6 +249,13 @@
         const resultado = await resposta.json();
         console.log('Resposta do servidor:', resultado);
         alert("Cadastro enviado com sucesso!");
+
+        // Resposta do Servidor
+        const divRetorno = document.getElementById('retornoServidor');
+        divRetorno.style.display = 'block';
+        divRetorno.className = resultado.success ? 'alert alert-success mt-3' : 'alert alert-danger mt-3';
+        divRetorno.textContent = resultado.message || 'Erro ao cadastrar.';
+
     });
 </script>
 </body>
