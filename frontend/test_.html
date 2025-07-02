@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro FoodShareTech</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+        }
+
+        .container-cadastro {
+            width: 90%;
+            max-width: 1000px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .form-image {
+            width: 40%;
+            background: #fde3a7d7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .form-image img {
+            width: 100%;
+            height: auto;
+        }
+
+        .form-content {
+            width: 60%;
+            padding: 2rem;
+        }
+
+        .form-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-box label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .input-box input,
+        .input-box select {
+            padding: 0.6rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .section-header {
+            margin-top: 2rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .input-box.half {
+            width: 48%;
+        }
+
+        .input-box.full {
+            width: 100%;
+        }
+
+        .continue-button button {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .add-button {
+            margin-top: 0.5rem;
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: fit-content;
+        }
+    </style>
+</head>
+<body>
+<div class="container-cadastro">
+    <div class="form-image">
+        <img src="https://via.placeholder.com/300x300" alt="Imagem ilustrativa">
+    </div>
+
+    <div class="form-content">
+        <form action="/cadastro" method="POST" id="formCadastro">
+
+            <div class="input-box full">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+
+            <div class="input-box full">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="input-box half">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" required>
+            </div>
+
+            <div class="input-box half">
+                <label for="tipo">Tipo</label>
+                <select id="tipo" name="tipo" required>
+                    <option value="">Selecione...</option>
+                    <option value="ONG">ONG</option>
+                    <option value="Doador">Doador</option>
+                </select>
+            </div>
+
+            <div class="input-box full">
+                <label for="cnpjCpf">CNPJ/CPF</label>
+                <input type="text" id="cnpjCpf" name="cnpjCpf" required>
+            </div>
+
+            <div class="section-header">Endereço</div>
+            <div class="input-group">
+                <div class="input-box half">
+                    <label for="estado">Estado</label>
+                    <input type="text" id="estado" name="estado" required>
+                </div>
+                <div class="input-box half">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" name="cidade" required>
+                </div>
+                <div class="input-box full">
+                    <label for="bairro">Bairro</label>
+                    <input type="text" id="bairro" name="bairro" required>
+                </div>
+                <div class="input-box full">
+                    <label for="logradouro">Logradouro</label>
+                    <input type="text" id="logradouro" name="logradouro" required>
+                </div>
+                <div class="input-box half">
+                    <label for="numero">Número</label>
+                    <input type="number" id="numero" name="numero" required>
+                </div>
+            </div>
+
+            <div class="section-header">Contatos</div>
+            <div class="input-box full">
+                <div id="telefonesContainer">
+                    <input type="text" name="contatos" placeholder="Contato 1" required>
+                </div>
+                <button type="button" class="add-button" onclick="adicionarContato()">+ Adicionar outro contato</button>
+            </div>
+
+            <div class="continue-button">
+                <button type="submit">Enviar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Adicionar novo campo de contato
+    function adicionarContato() {
+        const container = document.getElementById('telefonesContainer');
+        const novoInput = document.createElement('input');
+        novoInput.type = 'text';
+        novoInput.name = 'contatos';
+        novoInput.placeholder = 'Outro contato';
+        novoInput.required = true;
+        novoInput.style.marginTop = '0.5rem';
+        novoInput.style.display = 'block';
+        container.appendChild(novoInput);
+    }
+</script>
+</body>
+</html>
