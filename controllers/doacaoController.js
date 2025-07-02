@@ -1,77 +1,70 @@
 import conexao from '../db/conexao.js';
 
 export const criarDoacao = (req, res) => {
-    const {
-      id_doador,
-      quantidadeDoacao,
-      validade,
-      alimento
-    } = req.body;
-  
-    const dataAtual = new Date();
-    const dataDoacao = dataAtual.toISOString().split('T')[0]; // yyyy-mm-dd
-    const statusDoacao = 'Disponível';
-  
-    // Tempo de reivindicação = agora + 30 minutos
-    const dataReivindicacaoLimite = new Date(dataAtual.getTime() + 30 * 60000);
-    const tempoReivindicacao = dataReivindicacaoLimite.toTimeString().split(' ')[0]; // HH:MM:SS
-  
-    // Tempo de coleta será NULL por enquanto, só após a ONG ganhar o lance
-    const tempoColeta = null;
-  
-    const sqlDoacao = `
-      INSERT INTO Doacao (dataDoacao, quantidadeDoacao, validade, statusDoacao, tempoReivindicacao, tempoColeta)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-  
-    conexao.query(
-      sqlDoacao,
-      [dataDoacao, quantidadeDoacao, validade, statusDoacao, tempoReivindicacao, tempoColeta],
-      (err1, result1) => {
-        if (err1) return res.status(500).json({ error: err1 });
-  
-        const idDoacao = result1.insertId;
-  
-        const sqlAlimento = `
-          INSERT INTO Alimento (nomeAlimento, categoria, unidadeMedida, prioridade, fk_doacao_id)
-          VALUES (?, ?, ?, ?, ?)
-        `;
-  
-        conexao.query(
-          sqlAlimento,
-          [alimento.nomeAlimento, alimento.categoria, alimento.unidadeMedida, alimento.prioridade, idDoacao],
-          (err2) => {
-            if (err2) return res.status(500).json({ error: err2 });
-  
-            const sqlRelacaoDoador = `
-              UPDATE Doador SET fk_doacao_id = ? WHERE idDoador = ?
-            `;
-  
-            conexao.query(sqlRelacaoDoador, [idDoacao, id_doador], (err3) => {
-              if (err3) return res.status(500).json({ error: err3 });
-  
-              return res.status(201).json({
-                success: true,
-                message: 'Doação cadastrada com sucesso!',
-                idDoacao
-              });
-            });
-          }
-        );
-      }
-    );
-  };
+  const {
+    id_doador, // ID do doador que está fazendo a doação
+    quantidadeDoacao,
+    validade,
+    alimento
+  } = req.body;
 
-// 2. Listar todas as doações de um doador
+  const dataAtual = new Date();
+  const dataDoacao = dataAtual.toISOString().split('T')[0];
+  const statusDoacao = 'Disponível';
+  const dataReivindicacaoLimite = new Date(dataAtual.getTime() + 30 * 60000);
+  const tempoReivindicacao = dataReivindicacaoLimite.toTimeString().split(' ')[0];
+  const horaColeta = null;
+
+  // 1. O INSERT na Doacao agora inclui o fk_doador_id
+  const sqlDoacao = `
+    INSERT INTO Doacao (dataDoacao, quantidadeDoacao, validade, statusDoacao, tempoReivindicacao, horaColeta, fk_doador_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  conexao.query(
+    sqlDoacao,
+    // Adicionamos o id_doador aos parâmetros do INSERT
+    [dataDoacao, quantidadeDoacao, validade, statusDoacao, tempoReivindicacao, horaColeta, id_doador],
+    (err1, result1) => {
+      if (err1) return res.status(500).json({ error: err1 });
+
+      const idDoacao = result1.insertId;
+
+      // 2. O INSERT em Alimento continua o mesmo
+      const sqlAlimento = `
+        INSERT INTO Alimento (nomeAlimento, categoria, unidadeMedida, prioridade, fk_doacao_id)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+
+      conexao.query(
+        sqlAlimento,
+        [alimento.nomeAlimento, alimento.categoria, alimento.unidadeMedida, alimento.prioridade, idDoacao],
+        (err2) => {
+          if (err2) return res.status(500).json({ error: err2 });
+
+          // 3. O passo de UPDATE no Doador foi REMOVIDO.
+          // A lógica termina aqui, retornando sucesso.
+          return res.status(201).json({
+            success: true,
+            message: 'Doação cadastrada com sucesso!',
+            idDoacao
+          });
+        }
+      );
+    }
+  );
+};
+
+//2. Listar doações por doador
 export const listarDoacoesPorDoador = (req, res) => {
   const idDoador = parseInt(req.query.id);
 
+  // A consulta foi simplificada para filtrar diretamente na tabela Doacao
   const sql = `
-    SELECT d.idDoacao, d.dataDoacao, d.statusDoacao, a.nomeAlimento, a.categoria, a.quantidadePacote
+    SELECT d.idDoacao, d.dataDoacao, d.statusDoacao, a.nomeAlimento, a.categoria, a.unidadeMedida
     FROM Doacao d
     JOIN Alimento a ON a.fk_doacao_id = d.idDoacao
-    JOIN Doador doador ON doador.fk_doacao_id = d.idDoacao
-    WHERE doador.idDoador = ?
+    WHERE d.fk_doador_id = ? -- Filtro direto na coluna correta
   `;
 
   conexao.query(sql, [idDoador], (err, results) => {
@@ -85,10 +78,36 @@ export const detalharDoacao = (req, res) => {
   const idDoacao = parseInt(req.params.id);
 
   const sql = `
-    SELECT d.*, a.*
-    FROM Doacao d
-    LEFT JOIN Alimento a ON a.fk_doacao_id = d.idDoacao
-    WHERE d.idDoacao = ?
+    SELECT
+        -- Colunas da tabela Doacao
+        d.idDoacao,
+        d.dataDoacao,
+        d.quantidadeDoacao,
+        d.validade,
+        d.statusDoacao,
+        d.tempoReivindicacao,
+        d.dataColeta,      -- Adicionada de volta
+        d.horaColeta,      -- Adicionada de volta
+        d.statusColeta,    -- Adicionada de volta
+        
+        -- Colunas da tabela Alimento (sem o id_alimento)
+        a.nomeAlimento,
+        a.categoria,
+        a.unidadeMedida,
+        a.prioridade,
+        
+        -- Nome do Doador vindo da tabela Usuario
+        u.nome AS nomeDoador
+    FROM
+        Doacao d
+    LEFT JOIN
+        Alimento a ON a.fk_doacao_id = d.idDoacao
+    LEFT JOIN 
+        Doador doador ON d.fk_doador_id = doador.idDoador
+    LEFT JOIN 
+        Usuario u ON doador.fk_usuario_id = u.id_usuario
+    WHERE
+        d.idDoacao = ?
   `;
 
   conexao.query(sql, [idDoacao], (err, result) => {
