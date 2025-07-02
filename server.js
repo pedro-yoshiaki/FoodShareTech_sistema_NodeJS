@@ -23,12 +23,16 @@
 //Importar módulo express
 import express from 'express'
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express(); //Objeto 'app' com métodos do módulo express
 const PORT = 3000; //Porta do server
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+app.use(express.static(path.join(__dirname, 'view')));
 app.use(express.json()); //Tipo de dados que a rota vai manipular
-app.use(express.urlencoded({extended:true})); //Trabalhar com formulários HTML
+app.use(express.urlencoded({extended:false})); //Trabalhar com formulários HTML
 
 //Rota GET padrão
 app.get ("/", function (req, res){

@@ -1,9 +1,12 @@
+<!-- view/cadastro.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cadastro FoodShareTech</title>
+    <link rel="stylesheet" href="/css/style.css">
+
     <style>
         * {
             margin: 0;
@@ -122,25 +125,20 @@
     <div class="form-image">
         <img src="https://via.placeholder.com/300x300" alt="Imagem ilustrativa">
     </div>
-
     <div class="form-content">
-        <form action="/cadastro" method="POST" id="formCadastro">
-
+        <form id="formCadastro">
             <div class="input-box full">
                 <label for="nome">Nome</label>
                 <input type="text" id="nome" name="nome" required>
             </div>
-
             <div class="input-box full">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
             </div>
-
             <div class="input-box half">
                 <label for="senha">Senha</label>
                 <input type="password" id="senha" name="senha" required>
             </div>
-
             <div class="input-box half">
                 <label for="tipo">Tipo</label>
                 <select id="tipo" name="tipo" required>
@@ -149,12 +147,10 @@
                     <option value="Doador">Doador</option>
                 </select>
             </div>
-
             <div class="input-box full">
                 <label for="cnpjCpf">CNPJ/CPF</label>
                 <input type="text" id="cnpjCpf" name="cnpjCpf" required>
             </div>
-
             <div class="section-header">Endereço</div>
             <div class="input-group">
                 <div class="input-box half">
@@ -178,22 +174,19 @@
                     <input type="number" id="numero" name="numero" required>
                 </div>
             </div>
-
             <div class="section-header">Contatos</div>
             <div class="input-box full">
                 <div id="telefonesContainer">
-                    <input type="text" name="contatos" placeholder="Contato 1" required>
+                    <input type="text" class="contato-input" placeholder="Contato 1" required>
                 </div>
                 <button type="button" class="add-button" onclick="adicionarContato()">+ Adicionar outro contato</button>
             </div>
-
             <div class="continue-button">
                 <button type="submit">Enviar</button>
             </div>
         </form>
     </div>
 </div>
-
 <script>
     // Adicionar novo campo de contato
     function adicionarContato() {
@@ -207,6 +200,54 @@
         novoInput.style.display = 'block';
         container.appendChild(novoInput);
     }
+
+    // Captura o submit do formulário
+    document.getElementById('formCadastro').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const contatos = Array.from(form.querySelectorAll('input[name="contatos"]')).map(input => input.value);
+
+        const endereco = {
+            estado: form.estado.value,
+            cidade: form.cidade.value,
+            bairro: form.bairro.value,
+            logradouro: form.logradouro.value,
+            numero: form.numero.value
+        };
+
+        const dados = {
+            nome: form.nome.value,
+            email: form.email.value,
+            senha: form.senha.value,
+            tipo: form.tipo.value,
+            cnpjCpf: form.cnpjCpf.value,
+            endereco,
+            contatos
+        };
+
+        try {
+            const resposta = await fetch('/api/cadastro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            });
+
+            const resultado = await resposta.json();
+
+            if (resultado.success) {
+                alert('Cadastro realizado com sucesso!');
+                window.location.href = '/login.html'; // Redireciona para login
+            } else {
+                alert('Erro ao cadastrar: ' + resultado.message);
+            }
+        } catch (erro) {
+            console.error('Erro no envio:', erro);
+            alert('Erro na comunicação com o servidor.');
+        }
+    });
 </script>
 </body>
 </html>

@@ -2,6 +2,7 @@ import conexao from '../db/conexao.js';
 
 // Função para cadastrar um novo usuário (ONG ou Doador)
 export const cadastrarUsuario = (req, res) => {
+    console.log("Recebido:", req.body);
     const { nome, email, senha, tipo, cnpjCpf, endereco, contatos } = req.body;
 
     if (!nome || !email || !senha || !tipo || !endereco || !contatos || contatos.length === 0) {
