@@ -9,83 +9,83 @@
 <body>
 <div class="container-cadastro">
     <div class="form-image">
-        <img src="https://via.placeholder.com/300x300" alt="Imagem ilustrativa">
+        <img src="imagens/Copilot_20250702_172714.png" alt="Imagem ilustrativa de cadastro">
     </div>
 
     <div class="form-content">
         <form id="formCadastro">
-            <!-- Dados pessoais -->
-            <div class="input-box full">
-                <label for="nome">Nome</label>
-                <input type="text" id="nome" required>
+            <div class="flex-row">
+                <div class="input-box">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
             </div>
 
-            <div class="input-box full">
-                <label for="email">Email</label>
-                <input type="email" id="email" required>
+            <div class="flex-row">
+                <div class="input-box">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" required>
+                        <option value="">Selecione...</option>
+                        <option value="ONG">ONG</option>
+                        <option value="Doador">Doador</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="input-box half">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" required>
-            </div>
-
-            <div class="input-box half">
-                <label for="tipo">Tipo</label>
-                <select id="tipo" required>
-                    <option value="">Selecione...</option>
-                    <option value="ONG">ONG</option>
-                    <option value="Doador">Doador</option>
-                </select>
-            </div>
-
-            <div class="input-box full">
-                <label for="cnpjCpf">CNPJ/CPF</label>
+            <div class="input-box"> <label for="cnpjCpf">CNPJ/CPF</label>
                 <input type="text" id="cnpjCpf" required>
             </div>
 
-            <!-- Endereço -->
             <div class="section-header">Endereço</div>
-            <div class="input-group">
-                <div class="input-box half">
+            <div class="flex-row">
+                <div class="input-box">
                     <label for="estado">Estado</label>
                     <input type="text" id="estado" required>
                 </div>
-                <div class="input-box half">
+                <div class="input-box">
                     <label for="cidade">Cidade</label>
                     <input type="text" id="cidade" required>
                 </div>
-                <div class="input-box full">
+            </div>
+
+            <div class="flex-row">
+                <div class="input-box">
                     <label for="bairro">Bairro</label>
                     <input type="text" id="bairro" required>
                 </div>
-                <div class="input-box full">
+                <div class="input-box">
                     <label for="logradouro">Logradouro</label>
                     <input type="text" id="logradouro" required>
                 </div>
-                <div class="input-box half">
-                    <label for="numero">Número</label>
-                    <input type="number" id="numero" required>
-                </div>
             </div>
 
-            <!-- Contatos -->
+            <div class="input-box"> <label for="numero">Número</label>
+                <input type="number" id="numero" required>
+            </div>
+
             <div class="section-header">Contatos</div>
-            <div class="input-box full">
+            <div class="input-box">
                 <div id="telefonesContainer">
                     <input type="text" name="contatos" placeholder="Contato 1" required>
                 </div>
                 <button type="button" class="add-button" onclick="adicionarContato()">+ Adicionar outro contato</button>
             </div>
 
-            <!-- Botão -->
             <div class="continue-button">
                 <button type="submit">Enviar</button>
             </div>
 
-            <!-- Resposta do servidor-->
-            <div id="retornoServidor" class="alert mt-3" role="alert" style="display: none;"></div>
-
+            <div id="retornoServidor" class="alert" role="alert" style="display: none;"></div>
         </form>
     </div>
 </div>
@@ -106,6 +106,11 @@
     document.getElementById('formCadastro').addEventListener('submit', async function (e) {
         e.preventDefault();
 
+        const divRetorno = document.getElementById('retornoServidor');
+        // Esconde a mensagem anterior e limpa classes antes de uma nova tentativa
+        divRetorno.style.display = 'none';
+        divRetorno.className = 'alert'; // Reseta as classes
+
         const data = {
             nome: document.getElementById('nome').value,
             email: document.getElementById('email').value,
@@ -125,26 +130,58 @@
         // Pega os contatos
         const contatoInputs = document.querySelectorAll('#telefonesContainer input');
         contatoInputs.forEach(input => {
-            data.contatos.push(input.value);
+            if (input.value.trim() !== '') { // Garante que apenas contatos preenchidos sejam enviados
+                data.contatos.push(input.value.trim());
+            }
         });
 
-        // Envia para o back-end
-        const resposta = await fetch('/cadastro', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+        try {
+            // Envia para o back-end
+            const resposta = await fetch('/cadastro', { // Certifique-se de que esta URL está correta para seu backend
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
 
-        const resultado = await resposta.json();
-        console.log('Resposta do servidor:', resultado);
-        alert("Cadastro enviado com sucesso!");
+            let resultado;
+            // Tenta ler o JSON da resposta, mesmo que o status HTTP não seja 2xx
+            try {
+                resultado = await resposta.json();
+            } catch (jsonError) {
+                // Se a resposta não for um JSON válido, pode ser um erro do servidor (ex: 500 Internal Server Error)
+                throw new Error(`Erro ao processar a resposta do servidor. Status: ${resposta.status}`);
+            }
 
-        // Resposta do Servidor
-        const divRetorno = document.getElementById('retornoServidor');
-        divRetorno.style.display = 'block';
-        divRetorno.className = resultado.success ? 'alert alert-success mt-3' : 'alert alert-danger mt-3';
-        divRetorno.textContent = resultado.message || 'Erro ao cadastrar.';
+            console.log('Resposta do servidor:', resultado);
 
+            // Verifica se a propriedade 'success' no JSON é verdadeira
+            if (resultado.success) {
+                divRetorno.style.display = 'block';
+                divRetorno.className = 'alert alert-success mt-3';
+                divRetorno.textContent = resultado.message;
+
+                // Limpa o formulário após sucesso
+                document.getElementById('formCadastro').reset();
+                // Remove inputs de contato adicionais, deixando apenas o primeiro
+                const telefonesContainer = document.getElementById('telefonesContainer');
+                while (telefonesContainer.children.length > 1) {
+                    telefonesContainer.removeChild(telefonesContainer.lastChild);
+                }
+
+            } else {
+                // Se 'success' for false, exibe a mensagem de erro do backend
+                divRetorno.style.display = 'block';
+                divRetorno.className = 'alert alert-danger mt-3';
+                divRetorno.textContent = resultado.message || 'Erro desconhecido ao cadastrar. Verifique os campos.';
+            }
+
+        } catch (error) {
+            // Captura erros de rede ou outros erros que não resultem em uma resposta HTTP
+            console.error('Erro na requisição:', error);
+            divRetorno.style.display = 'block';
+            divRetorno.className = 'alert alert-danger mt-3';
+            divRetorno.textContent = error.message || 'Falha ao comunicar com o servidor. Verifique sua conexão e tente novamente.';
+        }
     });
 </script>
 </body>

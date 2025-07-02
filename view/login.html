@@ -8,7 +8,29 @@
     <link rel="stylesheet" href="/view/Estilos/estilologin.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        /* Estilos básicos para a mensagem de feedback (alerta) */
+        .alert {
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            text-align: center; /* Centraliza o texto */
+            word-wrap: break-word; /* Garante que o texto longo quebre a linha */
+        }
 
+        .alert-success {
+            background-color: #d4edda; /* Verde claro */
+            color: #155724; /* Verde escuro */
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da; /* Vermelho claro */
+            color: #721c24; /* Vermelho escuro */
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </head>
 <body class="d-flex align-items-center py-4 bg-body-tertiary h-100">
 
@@ -44,7 +66,7 @@
 </main>
 
 <script>
-    // Troca de tema e logo
+    // Troca de tema e logo (manter o seu código original aqui, está perfeito)
     function aplicarTemaVisual(temaAtual) {
         const html = document.documentElement;
         const logo = document.getElementById('logo');
@@ -81,36 +103,60 @@
 
     gerenciarTema(localStorage.getItem('tema-preferido') || 'auto');
 
-    // Interceptação do login com fetch()
+    // --- Interceptação do login com fetch() APRIMORADA ---
     document.getElementById('formLogin').addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const email = document.getElementById('email').value.trim();
         const senha = document.getElementById('senha').value.trim();
-        const mensagem = document.getElementById('mensagem');
+        const mensagemDiv = document.getElementById('mensagem'); // Renomeado para evitar conflito com 'mensagem' do backend
 
-        const resposta = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, senha })
-        });
+        // Esconde a mensagem anterior e reseta as classes antes de uma nova tentativa
+        mensagemDiv.style.display = 'none';
+        mensagemDiv.className = 'alert mt-3'; // Reseta as classes
 
-        const dados = await resposta.json();
+        try {
+            const resposta = await fetch('/api/login', { // Confirme se '/api/login' é a URL correta do seu backend
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha }) // Dados enviados para o backend
+            });
 
-        imensagem.style.display = 'block';
+            let dados;
+            // Tenta ler o JSON da resposta
+            try {
+                dados = await resposta.json();
+            } catch (jsonError) {
+                // Se a resposta não for um JSON válido, é um erro de comunicação ou no servidor
+                throw new Error(`Erro ao processar a resposta do servidor. Status: ${resposta.status}.`);
+            }
 
-        if (dados.success) {
-            mensagem.className = 'alert alert-success mt-3';
-            mensagem.textContent = `Login bem-sucedido! Bem-vindo, ${dados.usuario.nome}.`;
+            console.log('Resposta do servidor:', dados);
 
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1500);
-        } else {
-            mensagem.className = 'alert alert-danger mt-3';
-            mensagem.textContent = dados.message || 'Erro no login.';
+            mensagemDiv.style.display = 'block'; // Mostra a div de mensagem
+
+            if (dados.success) {
+                mensagemDiv.className = 'alert alert-success'; // Bootstrap classes for success alert
+                mensagemDiv.textContent = `Login bem-sucedido! Bem-vindo, ${dados.usuario.nome}.`;
+
+                // Redireciona para a página inicial após um pequeno atraso
+                setTimeout(() => {
+                    window.location.href = '/'; // Altere para a URL que deseja redirecionar
+                }, 1500); // Espera 1.5 segundos antes de redirecionar
+
+            } else {
+                // Login falhou, exibe a mensagem de erro do backend
+                mensagemDiv.className = 'alert alert-danger'; // Bootstrap classes for danger alert
+                mensagemDiv.textContent = dados.message || 'Erro desconhecido no login. Tente novamente.';
+            }
+
+        } catch (error) {
+            // Captura erros de rede (ex: servidor offline, URL incorreta) ou erros no processamento
+            console.error('Erro na requisição de login:', error);
+            mensagemDiv.style.display = 'block';
+            mensagemDiv.className = 'alert alert-danger';
+            mensagemDiv.textContent = error.message || 'Falha ao comunicar com o servidor. Verifique sua conexão ou tente mais tarde.';
         }
-
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

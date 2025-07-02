@@ -1,110 +1,226 @@
+
+    /* RESET GLOBAL */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif; /* Considere adicionar a fonte Inter no seu projeto */
 }
 
 body {
     background: #f0f0f0;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden; /* Remove scroll vertical indesejado */
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     padding: 2rem;
 }
 
+/* CONTAINER PRINCIPAL */
 .container-cadastro {
-    width: 90%;
-    max-width: 1000px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
     display: flex;
-    flex-wrap: wrap;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Garante que os cantos arredondados funcionem bem */
 }
 
+/* SEÇÃO DA IMAGEM */
 .form-image {
-    width: 40%;
-    background: #fde3a7d7;
+    width: 45%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    background: linear-gradient(135deg, #fde3a7, #fff3d4); /* Fundo com gradiente suave */
+    padding: 2rem;
 }
 
 .form-image img {
     width: 100%;
+    max-width: 360px; /* Limita o tamanho da imagem para melhor visualização */
     height: auto;
+    object-fit: contain; /* Garante que a imagem se ajuste sem cortar */
 }
 
+/* SEÇÃO DO FORMULÁRIO */
 .form-content {
-    width: 60%;
-    padding: 2rem;
+    width: 55%;
+    padding: 2rem 3rem;
+    overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
+    max-height: 90vh; /* Limita a altura para o scroll funcionar */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #ccc transparent; /* Firefox */
 }
 
-.form-content form {
+.form-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.form-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.form-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 6px;
+}
+
+/* GRUPOS DE INPUTS EM LINHA (FLEXBOX) */
+.flex-row {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    gap: 1rem; /* Espaçamento entre os itens na linha */
+    flex-wrap: wrap; /* Permite que os itens quebrem a linha em telas menores */
+    margin-bottom: 1rem;
 }
 
+.flex-row > .input-box {
+    flex: 1; /* Faz com que os itens se expandam igualmente */
+    min-width: 45%; /* Garante que cada item ocupe pelo menos 45% em telas menores */
+}
+
+/* ESTILO DOS INPUTS INDIVIDUAIS */
 .input-box {
     display: flex;
     flex-direction: column;
+    width: 100%; /* Por padrão, ocupa a largura total */
 }
 
 .input-box label {
     font-weight: 600;
     margin-bottom: 5px;
+    color: #333;
 }
 
 .input-box input,
 .input-box select {
-    padding: 0.6rem 1rem;
+    padding: 0.8rem 1rem;
     border: 1px solid #ccc;
     border-radius: 8px;
+    font-size: 1rem;
+    outline: none; /* Remove o contorno ao focar */
+    transition: border-color 0.3s ease;
 }
 
+.input-box input:focus,
+.input-box select:focus {
+    border-color: #6c63ff; /* Cor da borda ao focar */
+}
+
+/* TÍTULOS DE SEÇÃO */
 .section-header {
     margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
     font-weight: bold;
-    font-size: 1.2rem;
+    color: #333;
+    border-bottom: 1px solid #eee; /* Linha sutil para separar */
+    padding-bottom: 0.5rem;
 }
 
-.input-group {
+/* BOTÕES */
+.add-button {
+    margin-top: 0.8rem;
+    background-color: #e0e0e0;
+    color: #555;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    width: fit-content; /* Ajusta a largura ao conteúdo */
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+    background-color: #d0d0d0;
+}
+
+.continue-button {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.input-box.half {
-    width: 48%;
-}
-
-.input-box.full {
-    width: 100%;
+    justify-content: flex-end; /* Alinha o botão à direita */
+    margin-top: 2rem;
 }
 
 .continue-button button {
-    margin-top: 1rem;
-    padding: 0.75rem;
+    padding: 0.8rem 1.5rem;
     background-color: #6c63ff;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
 }
 
-.add-button {
-    margin-top: 0.5rem;
-    background-color: #ccc;
-    color: #333;
-    border: none;
-    padding: 0.4rem 0.75rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    width: fit-content;
+.continue-button button:hover {
+    background-color: #574bda;
+}
+
+/* ALERTAS DE RETORNO DO SERVIDOR */
+.alert {
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* MEDIA QUERIES para responsividade */
+@media (max-width: 900px) {
+    .form-image {
+        display: none; /* Esconde a imagem em telas menores para otimizar espaço */
+    }
+
+    .container-cadastro {
+        height: auto; /* Ajusta a altura automaticamente */
+        max-height: 95vh; /* Limita a altura em telas menores */
+    }
+
+    .form-content {
+        width: 100%; /* Ocupa a largura total */
+        padding: 1.5rem 2rem; /* Reduz o padding */
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 1rem;
+    }
+
+    .form-content {
+        padding: 1rem 1.5rem;
+    }
+
+    .flex-row {
+        gap: 0.8rem;
+    }
+
+    .flex-row > .input-box {
+        min-width: 100%; /* Itens ocupam a largura total em telas muito pequenas */
+    }
+
+    .input-box input,
+    .input-box select,
+    .continue-button button,
+    .add-button {
+        font-size: 0.9rem;
+        padding: 0.7rem;
+    }
 }
