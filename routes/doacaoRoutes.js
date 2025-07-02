@@ -10,8 +10,8 @@ const router = express.Router();
 
 router.post('/doacoes', criarDoacao);
 router.get('/doador/doacoes', listarDoacoesPorDoador);
-router.get('/doacoes/:id', detalharDoacao);
-// Exibir todas as doações disponíveis para ONGs
 router.get('/doacoes/disponiveis', listarDoacoesDisponiveis);
+router.get('/doacoes/:id', detalharDoacao);
+
 
 export default router;
