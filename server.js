@@ -32,7 +32,7 @@ app.use(express.urlencoded({extended:false})); //Trabalhar com formulários HTML
 
 //Rota GET padrão
 app.get ("/", function (req, res){
-    res.write("Hello Mundo!");
+    res.write("API FoodShareTech Ativa!");
     res.end();
 })
 
