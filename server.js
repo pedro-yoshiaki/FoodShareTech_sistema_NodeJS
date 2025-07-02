@@ -28,7 +28,7 @@ const app = express(); //Objeto 'app' com métodos do módulo express
 const PORT = 3000; //Porta do server
 
 app.use(express.json()); //Tipo de dados que a rota vai manipular
-app.use(express.urlencoded({extended:false})); //Trabalhar com formulários HTML
+app.use(express.urlencoded({extended:true})); //Trabalhar com formulários HTML
 
 //Rota GET padrão
 app.get ("/", function (req, res){
