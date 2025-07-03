@@ -2,50 +2,96 @@ import conexao from '../db/conexao.js';
 
 // Função para cadastrar um novo usuário (ONG ou Doador)
 export const cadastrarUsuario = (req, res) => {
-    console.log("Recebido:", req.body);
     const { nome, email, senha, tipo, cnpjCpf, endereco, contatos } = req.body;
 
-    if (!nome || !email || !senha || !tipo || !endereco || !contatos || contatos.length === 0) {
-        return res.status(400).json({ success: false, message: 'Campos obrigatórios ausentes.' });
+    // --- Bloco de Validação ---
+    if (!nome || !email || !senha || !tipo || !cnpjCpf || !endereco || !contatos || contatos.length === 0) {
+        return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios.' });
     }
+    if (tipo === 'ONG' && cnpjCpf.length !== 14) {
+        return res.status(400).json({ success: false, message: 'CNPJ inválido. Deve conter exatamente 14 dígitos.' });
+    }
+    // Adicione outras validações se necessário (ex: CPF com 11 dígitos)
+    // --- Fim da Validação ---
 
-    const data_cadastro = new Date();
-    const sqlUsuario = 'INSERT INTO Usuario (nome, email, senha, tipo, data_cadastro) VALUES (?, ?, ?, ?, ?)';
+    // 1. Inicia a Transação
+    conexao.beginTransaction(err => {
+        if (err) {
+            console.error("Erro ao iniciar transação:", err);
+            return res.status(500).json({ success: false, message: "Erro interno no servidor." });
+        }
 
-    conexao.query(sqlUsuario, [nome, email, senha, tipo, data_cadastro], (erro, resultadoUsuario) => {
-        if (erro) return res.status(500).json({ success: false, error: erro });
+        const data_cadastro = new Date();
+        const sqlUsuario = 'INSERT INTO Usuario (nome, email, senha, tipo, data_cadastro) VALUES (?, ?, ?, ?, ?)';
 
-        const id_usuario = resultadoUsuario.insertId;
+        // 2. Insere na Tabela Usuario
+        conexao.query(sqlUsuario, [nome, email, senha, tipo, data_cadastro], (errUsuario, resultUsuario) => {
+            if (errUsuario) {
+                return conexao.rollback(() => {
+                    console.error("Erro no Passo 2 (INSERT Usuario):", errUsuario);
+                    const message = errUsuario.code === 'ER_DUP_ENTRY' ? 'Este email já está cadastrado.' : 'Erro ao cadastrar usuário.';
+                    res.status(400).json({ success: false, message });
+                });
+            }
 
-        // Inserir Endereço
-        const { estado, cidade, bairro, logradouro, numero } = endereco;
-        const sqlEndereco = 'INSERT INTO Endereco (estado, cidade, bairro, logradouro, numero, fk_usuario_id) VALUES (?, ?, ?, ?, ?, ?)';
-        conexao.query(sqlEndereco, [estado, cidade, bairro, logradouro, numero, id_usuario], (erroEndereco) => {
-            if (erroEndereco) return res.status(500).json({ success: false, error: erroEndereco });
+            const id_usuario = resultUsuario.insertId;
 
-            // Inserir Contatos (um ou mais)
-            const sqlContato = 'INSERT INTO Contato (telefone, fk_usuario_id) VALUES ?';
-            const valoresContatos = contatos.map(telefone => [telefone, id_usuario]);
-
-            conexao.query(sqlContato, [valoresContatos], (erroContato) => {
-                if (erroContato) return res.status(500).json({ success: false, error: erroContato });
-
-                // Inserir ONG ou Doador
-                if (tipo === 'ONG') {
-                    const sqlOng = 'INSERT INTO ONG (nomeOng, cnpjOng, fk_usuario_id) VALUES (?, ?, ?)';
-                    conexao.query(sqlOng, [nome, cnpjCpf, id_usuario], (errONG) => {
-                        if (errONG) return res.status(500).json({ success: false, error: errONG });
-                        return res.status(201).json({ success: true, message: 'Cadastro de ONG realizado com sucesso.' });
+            // 3. Insere na Tabela Endereco
+            const { estado, cidade, bairro, logradouro, numero } = endereco;
+            const sqlEndereco = 'INSERT INTO Endereco (estado, cidade, bairro, logradouro, numero, fk_usuario_id) VALUES (?, ?, ?, ?, ?, ?)';
+            conexao.query(sqlEndereco, [estado, cidade, bairro, logradouro, numero, id_usuario], (errEndereco) => {
+                if (errEndereco) {
+                    return conexao.rollback(() => {
+                        console.error("Erro no Passo 3 (INSERT Endereco):", errEndereco);
+                        res.status(500).json({ success: false, message: "Erro ao salvar dados de endereço." });
                     });
-                } else if (tipo === 'Doador') {
-                    const sqlDoador = 'INSERT INTO Doador (cnpjCpfDoador, fk_usuario_id) VALUES (?, ?)';
-                    conexao.query(sqlDoador, [cnpjCpf, id_usuario], (errDoador) => {
-                        if (errDoador) return res.status(500).json({ success: false, error: errDoador });
-                        return res.status(201).json({ success: true, message: 'Cadastro de Doador realizado com sucesso.' });
-                    });
-                } else {
-                    return res.status(400).json({ success: false, message: 'Tipo inválido (ONG ou Doador).' });
                 }
+
+                // 4. Insere na Tabela Contato
+                const sqlContato = 'INSERT INTO Contato (telefone, fk_usuario_id) VALUES ?';
+                const valoresContatos = contatos.map(telefone => [telefone, id_usuario]);
+                conexao.query(sqlContato, [valoresContatos], (errContato) => {
+                    if (errContato) {
+                        return conexao.rollback(() => {
+                            console.error("Erro no Passo 4 (INSERT Contato):", errContato);
+                            res.status(500).json({ success: false, message: "Erro ao salvar dados de contato." });
+                        });
+                    }
+
+                    // 5. Insere na Tabela ONG ou Doador
+                    let sqlFinal, paramsFinal;
+                    if (tipo === 'ONG') {
+                        sqlFinal = 'INSERT INTO ONG (nomeOng, cnpjOng, fk_usuario_id) VALUES (?, ?, ?)';
+                        paramsFinal = [nome, cnpjCpf, id_usuario];
+                    } else if (tipo === 'Doador') {
+                        sqlFinal = 'INSERT INTO Doador (cnpjCpfDoador, fk_usuario_id) VALUES (?, ?)';
+                        paramsFinal = [cnpjCpf, id_usuario];
+                    } else {
+                        return conexao.rollback(() => res.status(400).json({ success: false, message: 'Tipo de usuário inválido.' }));
+                    }
+
+                    conexao.query(sqlFinal, paramsFinal, (errFinal) => {
+                        if (errFinal) {
+                            return conexao.rollback(() => {
+                                console.error("Erro no Passo 5 (INSERT ONG/Doador):", errFinal);
+                                const message = errFinal.code === 'ER_DUP_ENTRY' ? 'Este CNPJ/CPF já está cadastrado.' : 'Erro ao finalizar cadastro.';
+                                res.status(400).json({ success: false, message });
+                            });
+                        }
+
+                        // 6. Se tudo deu certo, efetiva as alterações no banco
+                        conexao.commit(errCommit => {
+                            if (errCommit) {
+                                return conexao.rollback(() => {
+                                    console.error("Erro ao comitar transação:", errCommit);
+                                    res.status(500).json({ success: false, message: "Erro ao finalizar cadastro." });
+                                });
+                            }
+                            // Finalmente, envia a resposta de sucesso!
+                            res.status(201).json({ success: true, message: 'Cadastro realizado com sucesso!' });
+                        });
+                    });
+                });
             });
         });
     });
