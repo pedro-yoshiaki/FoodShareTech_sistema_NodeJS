@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FoodShareTech - Relatório de Reivindicações ONG</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body { padding-top: 56px; }
+        nav .nav-link.active { font-weight: bold; }
+        .status-pendente { color: orange; font-weight: 600; }
+        .status-concluida { color: green; font-weight: 600; }
+        .card-icon { font-size: 2.5rem; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar topo -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">Sistema de Doações</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/home_ong">Home ONG</a></li>
+                <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/relatorio_ong">Relatório</a></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil_ong">Perfil ONG</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Histórico e Análise de Reivindicações</h2>
+    <div id="alertContainer"></div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Total de Reivindicações</h5>
+                        <p class="card-text fs-3" id="totalReivindicacoes">0</p>
+                    </div>
+                    <i class="bi bi-list-ol card-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Reivindicações Pendentes</h5>
+                        <p class="card-text fs-3" id="reivindicacoesPendentes">0</p>
+                    </div>
+                    <i class="bi bi-hourglass-split card-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Reivindicações Concluídas</h5>
+                        <p class="card-text fs-3" id="reivindicacoesConcluidas">0</p>
+                    </div>
+                    <i class="bi bi-check-circle card-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Filtros de Reivindicações</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="filtroStatus" class="form-label">Status:</label>
+                            <select class="form-select" id="filtroStatus">
+                                <option value="">Todos</option>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Concluída">Concluída</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filtroDataInicio" class="form-label">Data Início:</label>
+                            <input type="date" class="form-control" id="filtroDataInicio">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filtroDataFim" class="form-label">Data Fim:</label>
+                            <input type="date" class="form-control" id="filtroDataFim">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button class="btn btn-primary" id="aplicarFiltros">Aplicar Filtros</button>
+                            <button class="btn btn-secondary" id="limparFiltros">Limpar Filtros</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Reivindicações por Status</h5>
+                    <canvas id="chartStatus"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Reivindicações por Prioridade</h5>
+                    <canvas id="chartPrioridade"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Detalhes das Reivindicações</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID Reivindicação</th>
+                        <th>Status</th>
+                        <th>Data da Reivindicação</th>
+                        <th>Prioridade Calculada</th>
+                        <th>ID Doação</th>
+                        <th>Status da Doação</th>
+                        <th>Nome do Alimento</th>
+                    </tr>
+                    </thead>
+                    <tbody id="reivindicacoesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+    // Registra o plugin datalabels globalmente
+    Chart.register(ChartDatalabels);
+
+    const idOng = 1; // Troque para pegar do login/sessão real
+    let allReivindicacoes = []; // Armazena todos os dados para filtragem
+
+    // Variáveis para os gráficos
+    let chartStatus;
+    let chartPrioridade;
+
+    /**
+     * Atualiza os cartões de resumo com os dados totais, pendentes e concluídos.
+     * @param {Array} reivindicacoes - Lista de reivindicações.
+     */
+    function atualizarCardsResumo(reivindicacoes) {
+        document.getElementById('totalReivindicacoes').textContent = reivindicacoes.length;
+        const pendentes = reivindicacoes.filter(item => item.statusReivindicacao.toLowerCase() === 'pendente').length;
+        const concluidas = reivindicacoes.filter(item => item.statusReivindicacao.toLowerCase() === 'concluída').length;
+        document.getElementById('reivindicacoesPendentes').textContent = pendentes;
+        document.getElementById('reivindicacoesConcluidas').textContent = concluidas;
+    }
+
+    /**
+     * Renderiza o gráfico de status das reivindicações.
+     * @param {Array} reivindicacoes - Lista de reivindicações.
+     */
+    function renderChartStatus(reivindicacoes) {
+        const statusCounts = {};
+        reivindicacoes.forEach(item => {
+            const status = item.statusReivindicacao;
+            statusCounts[status] = (statusCounts[status] || 0) + 1;
+        });
+
+        const labels = Object.keys(statusCounts);
+        const data = Object.values(statusCounts);
+        const backgroundColors = labels.map(label => {
+            if (label.toLowerCase() === 'pendente') return 'rgba(255, 159, 64, 0.7)'; // Laranja
+            if (label.toLowerCase() === 'concluída') return 'rgba(75, 192, 192, 0.7)'; // Verde
+            return 'rgba(201, 203, 207, 0.7)'; // Cinza para outros status
+        });
+        const borderColors = labels.map(label => {
+            if (label.toLowerCase() === 'pendente') return 'rgba(255, 159, 64, 1)';
+            if (label.toLowerCase() === 'concluída') return 'rgba(75, 192, 192, 1)';
+            return 'rgba(201, 203, 207, 1)';
+        });
+
+        const ctx = document.getElementById('chartStatus').getContext('2d');
+
+        if (chartStatus) {
+            chartStatus.destroy(); // Destrói o gráfico anterior para renderizar um novo
+        }
+
+        chartStatus = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
+                                const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                return `${label}: ${value} (${percentage})`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        formatter: (value, context) => {
+                            const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
+                            const percentage = ((value / total) * 100).toFixed(1) + '%';
+                            return percentage;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Renderiza o gráfico de prioridade das reivindicações.
+     * @param {Array} reivindicacoes - Lista de reivindicações.
+     */
+    function renderChartPrioridade(reivindicacoes) {
+        // Agrupa por faixa de prioridade (ex: 0-25, 26-50, 51-75, 76-100)
+        const prioridadeFaixas = {
+            '0-25': 0,
+            '26-50': 0,
+            '51-75': 0,
+            '76-100': 0
+        };
+
+        reivindicacoes.forEach(item => {
+            const prioridade = item.prioridadeCalculada;
+            if (prioridade >= 0 && prioridade <= 25) {
+                prioridadeFaixas['0-25']++;
+            } else if (prioridade > 25 && prioridade <= 50) {
+                prioridadeFaixas['26-50']++;
+            } else if (prioridade > 50 && prioridade <= 75) {
+                prioridadeFaixas['51-75']++;
+            } else if (prioridade > 75 && prioridade <= 100) {
+                prioridadeFaixas['76-100']++;
+            }
+        });
+
+        const labels = Object.keys(prioridadeFaixas);
+        const data = Object.values(prioridadeFaixas);
+
+        const ctx = document.getElementById('chartPrioridade').getContext('2d');
+
+        if (chartPrioridade) {
+            chartPrioridade.destroy(); // Destrói o gráfico anterior
+        }
+
+        chartPrioridade = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Número de Reivindicações',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)', // Azul
+                        'rgba(255, 206, 86, 0.7)', // Amarelo
+                        'rgba(153, 102, 255, 0.7)', // Roxo
+                        'rgba(255, 99, 132, 0.7)' // Vermelho
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantidade de Reivindicações'
+                        },
+                        ticks: {
+                            precision: 0 // Garante que os ticks sejam números inteiros
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Faixa de Prioridade Calculada'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Reivindicações: ${context.raw}`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#000',
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value > 0 ? value : '' // Mostra o valor apenas se for maior que 0
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Popula a tabela com as reivindicações filtradas.
+     * @param {Array} reivindicacoesFiltradas - Lista de reivindicações a serem exibidas.
+     */
+    function popularTabela(reivindicacoesFiltradas) {
+        const tbody = document.getElementById('reivindicacoesBody');
+        tbody.innerHTML = ''; // Limpa a tabela
+
+        if (reivindicacoesFiltradas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma reivindicação encontrada com os filtros aplicados.</td></tr>';
+            return;
+        }
+
+        reivindicacoesFiltradas.forEach(item => {
+            const tr = document.createElement('tr');
+            let statusClass = '';
+            if (item.statusReivindicacao.toLowerCase() === 'pendente') statusClass = 'status-pendente';
+            else if (item.statusReivindicacao.toLowerCase() === 'concluída') statusClass = 'status-concluida';
+
+            tr.innerHTML = `
+                <td>${item.idReivindicacao}</td>
+                <td class="${statusClass}">${item.statusReivindicacao}</td>
+                <td>${new Date(item.dataReivindicacao).toLocaleString()}</td>
+                <td>${item.prioridadeCalculada.toFixed(2)}</td>
+                <td>${item.idDoacao}</td>
+                <td>${item.statusDoacao}</td>
+                <td>${item.nomeAlimento}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /**
+     * Carrega as reivindicações da API e as exibe.
+     * Aplica filtros e atualiza os gráficos e a tabela.
+     */
+    async function carregarReivindicacoes() {
+        try {
+            const resposta = await fetch(`/api/ong/reivindicacoes?idOng=${idOng}`);
+            const dados = await resposta.json();
+
+            if (!dados.success) {
+                document.getElementById('alertContainer').innerHTML =
+                    `<div class="alert alert-danger">${dados.message || 'Erro ao carregar reivindicações.'}</div>`;
+                return;
+            }
+
+            allReivindicacoes = dados.reivindicacoes; // Armazena todos os dados brutos
+
+            aplicarFiltros(); // Aplica os filtros iniciais (todos os dados)
+            atualizarCardsResumo(allReivindicacoes); // Atualiza os cards com todos os dados
+            renderChartStatus(allReivindicacoes); // Renderiza o gráfico de status com todos os dados
+            renderChartPrioridade(allReivindicacoes); // Renderiza o gráfico de prioridade com todos os dados
+
+        } catch (error) {
+            document.getElementById('alertContainer').innerHTML =
+                `<div class="alert alert-danger">Erro ao carregar reivindicações. Tente novamente mais tarde.</div>`;
+            console.error(error);
+        }
+    }
+
+    /**
+     * Aplica os filtros selecionados e atualiza a tabela.
+     */
+    function aplicarFiltros() {
+        let reivindicacoesFiltradas = [...allReivindicacoes]; // Cria uma cópia para filtrar
+
+        const filtroStatus = document.getElementById('filtroStatus').value;
+        const filtroDataInicio = document.getElementById('filtroDataInicio').value;
+        const filtroDataFim = document.getElementById('filtroDataFim').value;
+
+        if (filtroStatus) {
+            reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item =>
+                item.statusReivindicacao.toLowerCase() === filtroStatus.toLowerCase()
+            );
+        }
+
+        if (filtroDataInicio) {
+            const dataInicio = new Date(filtroDataInicio + 'T00:00:00'); // Adiciona T00:00:00 para garantir a data correta
+            reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => {
+                const dataReivindicacao = new Date(item.dataReivindicacao);
+                return dataReivindicacao >= dataInicio;
+            });
+        }
+
+        if (filtroDataFim) {
+            const dataFim = new Date(filtroDataFim + 'T23:59:59'); // Adiciona T23:59:59 para incluir o dia inteiro
+            reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => {
+                const dataReivindicacao = new Date(item.dataReivindicacao);
+                return dataReivindicacao <= dataFim;
+            });
+        }
+
+        popularTabela(reivindicacoesFiltradas);
+        // Atualiza os gráficos também com os dados filtrados
+        renderChartStatus(reivindicacoesFiltradas);
+        renderChartPrioridade(reivindicacoesFiltradas);
+    }
+
+    /**
+     * Limpa todos os filtros e recarrega os dados originais.
+     */
+    function limparFiltros() {
+        document.getElementById('filtroStatus').value = '';
+        document.getElementById('filtroDataInicio').value = '';
+        document.getElementById('filtroDataFim').value = '';
+        aplicarFiltros(); // Re-aplica os filtros (agora vazios) para mostrar todos os dados
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', carregarReivindicacoes);
+    document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
+    document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</body>
+</html>
