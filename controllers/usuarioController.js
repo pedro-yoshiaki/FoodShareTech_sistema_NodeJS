@@ -88,7 +88,8 @@ export const cadastrarUsuario = (req, res) => {
                                 });
                             }
                             // Finalmente, envia a resposta de sucesso!
-                            res.status(201).json({ success: true, message: 'Cadastro realizado com sucesso!' });
+                            const successMessage = `Cadastro de ${tipo} realizado com sucesso.`;
+                            res.status(201).json({ success: true, message: successMessage });
                         });
                     });
                 });
