@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Formulário de login</title>
-    <link rel="stylesheet" href="/view/Estilos/estilologin.css">
+    <link rel="stylesheet" href="/Estilos/estilologin.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
@@ -36,7 +36,7 @@
 
 <main class="w-100 m-auto form-container">
     <form id="formLogin" class="form-signin">
-        <img id="logo" src="/view/imagens/Copilot_light.png" alt="Logo"
+        <img id="logo" src="/imagens/Copilot_light.png" alt="Logo"
              style="width: 256px; height: 256px; object-fit: cover; display: block; margin: 0 auto;" />
         <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
@@ -73,7 +73,7 @@
 
         html.setAttribute('data-bs-theme', temaAtual);
 
-        logo.src = (temaAtual === 'dark') ? '/view/imagens/Copilot_dark.png' : '/view/imagens/Copilot_light.png';
+        logo.src = (temaAtual === 'dark') ? '/imagens/Copilot_dark.png' : '/imagens/Copilot_light.png';
 
         document.querySelectorAll('.theme-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === temaAtual);
