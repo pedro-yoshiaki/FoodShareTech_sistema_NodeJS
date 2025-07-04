@@ -81,7 +81,7 @@ if (!usuarioLogado || usuarioLogado.tipo !== 'ONG') {
 }
 // --- Fim do Bloco de Verificação ---
 
-// Agora, estas variáveis só são declaradas se o usuário for válido, evitando o erro.
+// Agora, estas variáveis só são declaradas se o usuário for válido
 const idOng = usuarioLogado.perfilId;
 let doacaoSelecionada = null;
 
@@ -91,7 +91,7 @@ const btnReivindicar = document.getElementById('btnReivindicar');
 // --- Definição das Funções ---
 async function carregarDoacoes() {
     try {
-        const response = await fetch('/api/doacoes/disponiveis');
+        const response = await fetch(`/api/doacoes/disponiveis?idOng=${idOng}`);
         if (!response.ok) {
             throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
         }
@@ -102,25 +102,33 @@ async function carregarDoacoes() {
             return;
         }
 
-        doacoesContainer.innerHTML = doacoes.map(doacao => `
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">${doacao.nomeAlimento}</h5>
-                        <p class="card-text">
-                            <i class="fas fa-box me-2"></i> Qtd: ${doacao.quantidadeDoacao}<br>
-                            <i class="fas fa-calendar-times me-2"></i> Validade: ${new Date(doacao.validade).toLocaleDateString()}<br>
-                            <i class="fas fa-hourglass-half me-2"></i> Lances até: ${doacao.tempoReivindicacao}
-                        </p>
-                        <div class="mt-auto">
-                            <button class="btn btn-outline-success" onclick="abrirModal(${doacao.idDoacao})">
-                                Ver Detalhes
-                            </button>
+        doacoesContainer.innerHTML = doacoes.map(doacao => {
+              // Cria o HTML do badge SE a doação já foi reivindicada
+              const badgeHtml = doacao.jaReivindicado 
+                ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Lance Feito</span>' 
+                : '';
+
+            return `
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        ${badgeHtml} 
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${doacao.nomeAlimento}</h5>
+                            <p class="card-text">
+                                <i class="fas fa-box me-2"></i> Qtd: ${doacao.quantidadeDoacao}<br>
+                                <i class="fas fa-calendar-times me-2"></i> Validade: ${new Date(doacao.validade).toLocaleDateString()}<br>
+                                <i class="fas fa-hourglass-half me-2"></i> Lances até: ${doacao.tempoReivindicacao}
+                            </p>
+                            <div class="mt-auto">
+                                <button class="btn btn-outline-success" onclick="abrirModal(${doacao.idDoacao})">
+                                    Ver Detalhes
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
     } catch (error) {
         console.error('Erro ao carregar doações:', error);
@@ -154,6 +162,14 @@ window.abrirModal = async function(idDoacao) {
             <p><strong>Quantidade:</strong> ${doacaoDetalhada.quantidadeDoacao} ${doacaoDetalhada.unidadeMedida || ''}</p>
             <p><strong>Validade:</strong> ${new Date(doacaoDetalhada.validade).toLocaleDateString()}</p>
             <p><strong>Status:</strong> ${doacaoDetalhada.statusDoacao}</p>
+
+            <hr>
+            
+            <p><strong>Endereço de Coleta:</strong></p>
+            <p>
+                ${doacaoDetalhada.logradouro}, ${doacaoDetalhada.numero}<br>
+                ${doacaoDetalhada.bairro} - ${doacaoDetalhada.cidade}/${doacaoDetalhada.estado}
+            </p>
         `;
     } catch (error) {
         console.error('Erro ao buscar detalhes da doação:', error);

@@ -38,6 +38,13 @@ export const fazerReivindicacao = (req, res) => {
         conexao.query(sqlInsertReivindicacao, [prioridade, statusInicial, dataReivindicacao, idOng, idDoacao], (erroInsert, resultadoInsert) => {
             if (erroInsert) {
                 console.error("Erro ao inserir reivindicação:", erroInsert);
+                // --- LÓGICA ADICIONADA AQUI ---
+                // Verifica se o código do erro é de entrada duplicada
+                if (erroInsert.code === 'ER_DUP_ENTRY') {
+                    // Se for, envia uma mensagem amigável com status 409 (Conflict)
+                    return res.status(409).json({ success: false, message: 'Você já fez um lance para esta doação.' });
+                }
+                // --- FIM DA LÓGICA ---
                 return res.status(500).json({ success: false, message: "Erro ao registrar reivindicação.", error: erroInsert });
             }
 
@@ -95,35 +102,39 @@ export const verReivindicacoes = (req, res) => {
  * Rota: POST /api/reivindicacoes/:id/confirmar
  */
 export const confirmarColeta = (req, res) => {
-    // O ID da Reivindicação vencedora é pego da URL
-    const { id } = req.params;
+    const { id } = req.params; // ID da Reivindicação vencedora
 
-    // 1. Busca o ID da Doação associada a esta reivindicação
-    const sqlBuscaDoacao = 'SELECT fk_doacao_id FROM Reivindicacao WHERE idReivindicacao = ?';
+    const sqlBuscaDoacao = 'SELECT fk_doacao_id, statusDoacao FROM Doacao INNER JOIN Reivindicacao ON Doacao.idDoacao = Reivindicacao.fk_doacao_id WHERE Reivindicacao.idReivindicacao = ?';
 
     conexao.query(sqlBuscaDoacao, [id], (erroBusca, resultadoBusca) => {
         if (erroBusca) return res.status(500).json({ success: false, error: erroBusca });
-        if (resultadoBusca.length === 0) return res.status(404).json({ success: false, message: "Reivindicação não encontrada." });
+        if (resultadoBusca.length === 0) return res.status(404).json({ success: false, message: "Reivindicação ou doação associada não encontrada." });
 
         const idDoacao = resultadoBusca[0].fk_doacao_id;
+        const statusAtual = resultadoBusca[0].statusDoacao;
 
-        // 2. Atualiza a tabela Doacao, informando os dados da coleta.
-        // O TRIGGER 'tr_update_status_coleta' que você criou no banco será disparado
-        // automaticamente para mudar o status para 'Coletada'.
-        const sqlUpdateDoacao = `
+        // 1. VERIFICAÇÃO: Garante que a coleta só pode ser confirmada se o status for 'Aguardando Coleta'
+        if (statusAtual !== 'Aguardando Coleta') {
+            return res.status(400).json({ success: false, message: `Ação não permitida. O status da doação é '${statusAtual}', não 'Aguardando Coleta'.` });
+        }
+
+        // 2. ATUALIZAÇÃO FINAL: Muda o status para 'Coletada' e o status da coleta para 'Confirmada'.
+        // Também atualiza a data e hora para o momento exato da confirmação.
+        const sqlUpdateFinal = `
             UPDATE Doacao 
             SET 
+                statusDoacao = 'Coletada',
+                statusColeta = 'Confirmada',
                 dataColeta = CURDATE(), 
-                horaColeta = CURTIME(), 
-                statusDoacao = 'Aguardando Coleta' 
+                horaColeta = CURTIME()
             WHERE idDoacao = ?
         `;
 
-        conexao.query(sqlUpdateDoacao, [idDoacao], (erroUpdate, resultadoUpdate) => {
+        conexao.query(sqlUpdateFinal, [idDoacao], (erroUpdate, resultadoUpdate) => {
             if (erroUpdate) return res.status(500).json({ success: false, error: erroUpdate });
 
             if (resultadoUpdate.affectedRows === 0) {
-                return res.status(404).json({ success: false, message: "Doação correspondente não encontrada para confirmação." });
+                return res.status(404).json({ success: false, message: "Doação não encontrada para confirmação." });
             }
 
             // 3. (Opcional, mas recomendado) Atualiza o status da reivindicação para 'Concluída'
