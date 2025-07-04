@@ -107,7 +107,7 @@ export const loginUsuario = (req, res) => {
         return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios.' });
     }
 
-    const sql = 'SELECT * FROM Usuario WHERE email = ? AND senha = ?';
+    const sql = 'SELECT id_usuario, nome, email, tipo FROM Usuario WHERE email = ? AND senha = ?';
     conexao.query(sql, [email, senha], (erro, resultados) => {
         if (erro) return res.status(500).json({ success: false, error: erro });
 
@@ -116,7 +116,31 @@ export const loginUsuario = (req, res) => {
         }
 
         const usuario = resultados[0];
-        return res.status(200).json({ success: true, usuario });
+
+        // --- LÓGICA ADICIONAL AQUI ---
+        // Agora que temos o usuário, buscamos seu ID de perfil específico (ONG ou Doador)
+        let sqlPerfil, tabelaId;
+        if (usuario.tipo === 'ONG') {
+            sqlPerfil = 'SELECT idOng FROM ONG WHERE fk_usuario_id = ?';
+            tabelaId = 'idOng';
+        } else if (usuario.tipo === 'Doador') {
+            sqlPerfil = 'SELECT idDoador FROM Doador WHERE fk_usuario_id = ?';
+            tabelaId = 'idDoador';
+        } else {
+            return res.status(200).json({ success: true, usuario });
+        }
+
+        conexao.query(sqlPerfil, [usuario.id_usuario], (errPerfil, resultPerfil) => {
+            if (errPerfil) return res.status(500).json({ success: false, error: errPerfil });
+            
+            if (resultPerfil.length > 0) {
+                // Adiciona o id específico (idOng ou idDoador) ao objeto do usuário
+                usuario.perfilId = resultPerfil[0][tabelaId];
+            }
+            
+            // Retorna o objeto de usuário completo
+            return res.status(200).json({ success: true, usuario });
+        });
     });
 };
 

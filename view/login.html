@@ -139,10 +139,25 @@
                 mensagemDiv.className = 'alert alert-success'; // Bootstrap classes for success alert
                 mensagemDiv.textContent = `Login bem-sucedido! Bem-vindo, ${dados.usuario.nome}.`;
 
-                // Redireciona para a página inicial após um pequeno atraso
+                // SALVA OS DADOS DO USUÁRIO NO NAVEGADOR
+                localStorage.setItem('usuarioLogado', JSON.stringify(dados.usuario));
+                 // Aguarda 1.5 segundos antes de redirecionar
                 setTimeout(() => {
-                    window.location.href = '/'; // Altere para a URL que deseja redirecionar
-                }, 1500); // Espera 1.5 segundos antes de redirecionar
+                    // --- LÓGICA DE REDIRECIONAMENTO AQUI ---
+                    // Verifica o tipo de usuário retornado pelo backend
+                    if (dados.usuario.tipo === 'ONG') {
+                        // Se for ONG, redireciona para a home da ONG
+                        window.location.href = 'home_ong.html';
+                    } else if (dados.usuario.tipo === 'Doador') {
+                        // Se for Doador, redireciona para a home do Doador
+                        window.location.href = 'home_doador.html';
+                    } else {
+                        // Um fallback (caso seguro), caso o tipo não seja reconhecido
+                        console.error('Tipo de usuário desconhecido:', dados.usuario.tipo);
+                        window.location.href = '/'; // Redireciona para uma página padrão
+                    }
+                    // --- FIM DA LÓGICA ---
+                }, 1500);
 
             } else {
                 // Login falhou, exibe a mensagem de erro do backend

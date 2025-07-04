@@ -22,12 +22,12 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse" id="navbarNav">   
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/home_ong">Home ONG</a></li>
-                <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong">Confirmar Coleta</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/relatorio_ong">Relatório</a></li>
-                <li class="nav-item"><a class="nav-link" href="/perfil_ong">Perfil ONG</a></li>
+                <li class="nav-item"><a class="nav-link" href="/home_ong.html">Home ONG</a></li>
+                <li class="nav-item"><a class="nav-link" href="/confirmar_entrega_ong.html">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/relatorio_ong.html">Relatório</a></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil_ong.html">Perfil ONG</a></li>
             </ul>
         </div>
     </div>
@@ -82,9 +82,12 @@
                         <div class="col-md-4">
                             <label for="filtroStatus" class="form-label">Status:</label>
                             <select class="form-select" id="filtroStatus">
-                                <option value="">Todos</option>
-                                <option value="Pendente">Pendente</option>
-                                <option value="Concluída">Concluída</option>
+                                <option value="">Todos os Resultados</option>
+                                <option value="Coletado por sua ONG">Coletado por sua ONG</option>
+                                <option value="Aguardando sua Coleta">Aguardando sua Coleta</option>
+                                <option value="Em disputa">Em disputa</option>
+                                <option value="Doação Cancelada">Doação Cancelada</option>
+                                <option value="Disputa Encerrada (Não Venceu)">Disputa Encerrada (Não Venceu)</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -132,15 +135,14 @@
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
-                    <tr>
-                        <th>ID Reivindicação</th>
-                        <th>Status</th>
-                        <th>Data da Reivindicação</th>
-                        <th>Prioridade Calculada</th>
-                        <th>ID Doação</th>
-                        <th>Status da Doação</th>
-                        <th>Nome do Alimento</th>
-                    </tr>
+                        <tr>
+                            <th>ID Lance</th>
+                            <th>Data do Lance</th>
+                            <th>Sua Prioridade</th>
+                            <th>Alimento</th>
+                            <th>Doador</th>
+                            <th>Resultado da Disputa</th>
+                        </tr>
                     </thead>
                     <tbody id="reivindicacoesBody">
                     </tbody>
@@ -154,24 +156,42 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>
-    // Registra o plugin datalabels globalmente
-    Chart.register(ChartDatalabels);
+     // Registra o plugin de datalabels para os gráficos
+     Chart.register(ChartDataLabels);
 
-    const idOng = 1; // Troque para pegar do login/sessão real
-    let allReivindicacoes = []; // Armazena todos os dados para filtragem
-
-    // Variáveis para os gráficos
+    // Variáveis globais para os dados e gráficos
+    let allReivindicacoes = [];
     let chartStatus;
     let chartPrioridade;
+
+    // --- LÓGICA DE AUTENTICAÇÃO E EXECUÇÃO PRINCIPAL ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+        const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
+
+        if (!usuarioLogado || usuarioLogado.tipo !== 'ONG') {
+            alert('Acesso não autorizado. Você precisa estar logado como uma ONG.');
+            window.location.href = 'login.html';
+            return; 
+        }
+
+        // Pega o ID de perfil da ONG logada e inicia o carregamento dos dados
+        const idOngLogada = usuarioLogado.perfilId;
+        carregarReivindicacoes(idOngLogada);
+
+        // Adiciona os event listeners para os botões de filtro
+        document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
+        document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
+    });
 
     /**
      * Atualiza os cartões de resumo com os dados totais, pendentes e concluídos.
      * @param {Array} reivindicacoes - Lista de reivindicações.
      */
-    function atualizarCardsResumo(reivindicacoes) {
+     function atualizarCardsResumo(reivindicacoes) {
         document.getElementById('totalReivindicacoes').textContent = reivindicacoes.length;
-        const pendentes = reivindicacoes.filter(item => item.statusReivindicacao.toLowerCase() === 'pendente').length;
-        const concluidas = reivindicacoes.filter(item => item.statusReivindicacao.toLowerCase() === 'concluída').length;
+        const pendentes = reivindicacoes.filter(item => item.resultadoFinal.toLowerCase() === 'em disputa').length;
+        const concluidas = reivindicacoes.filter(item => item.resultadoFinal.toLowerCase().includes('coletado')).length;
         document.getElementById('reivindicacoesPendentes').textContent = pendentes;
         document.getElementById('reivindicacoesConcluidas').textContent = concluidas;
     }
@@ -180,30 +200,30 @@
      * Renderiza o gráfico de status das reivindicações.
      * @param {Array} reivindicacoes - Lista de reivindicações.
      */
-    function renderChartStatus(reivindicacoes) {
+     function renderChartStatus(reivindicacoes) {
         const statusCounts = {};
+        // A lógica de contagem agora usa a coluna 'resultadoFinal'
         reivindicacoes.forEach(item => {
-            const status = item.statusReivindicacao;
+            const status = item.resultadoFinal;
             statusCounts[status] = (statusCounts[status] || 0) + 1;
         });
 
         const labels = Object.keys(statusCounts);
         const data = Object.values(statusCounts);
+        
+        // As cores podem ser ajustadas para os novos status se desejar
         const backgroundColors = labels.map(label => {
-            if (label.toLowerCase() === 'pendente') return 'rgba(255, 159, 64, 0.7)'; // Laranja
-            if (label.toLowerCase() === 'concluída') return 'rgba(75, 192, 192, 0.7)'; // Verde
-            return 'rgba(201, 203, 207, 0.7)'; // Cinza para outros status
+            if (label.toLowerCase().includes('coletado')) return 'rgba(75, 192, 192, 0.7)'; // Verde
+            if (label.toLowerCase().includes('aguardando')) return 'rgba(255, 159, 64, 0.7)'; // Laranja
+            if (label.toLowerCase().includes('em disputa')) return 'rgba(54, 162, 235, 0.7)'; // Azul
+            return 'rgba(201, 203, 207, 0.7)'; // Cinza para outros
         });
-        const borderColors = labels.map(label => {
-            if (label.toLowerCase() === 'pendente') return 'rgba(255, 159, 64, 1)';
-            if (label.toLowerCase() === 'concluída') return 'rgba(75, 192, 192, 1)';
-            return 'rgba(201, 203, 207, 1)';
-        });
+        const borderColors = backgroundColors.map(color => color.replace('0.7', '1'));
 
         const ctx = document.getElementById('chartStatus').getContext('2d');
 
         if (chartStatus) {
-            chartStatus.destroy(); // Destrói o gráfico anterior para renderizar um novo
+            chartStatus.destroy();
         }
 
         chartStatus = new Chart(ctx, {
@@ -217,19 +237,18 @@
                     borderWidth: 1
                 }]
             },
+            // O restante das suas opções de gráfico continua o mesmo...
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+                    legend: { position: 'top' },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
                                 const label = context.label || '';
                                 const value = context.raw;
                                 const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
-                                const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
                                 return `${label}: ${value} (${percentage})`;
                             }
                         }
@@ -238,8 +257,8 @@
                         color: '#fff',
                         formatter: (value, context) => {
                             const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
-                            const percentage = ((value / total) * 100).toFixed(1) + '%';
-                            return percentage;
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '';
+                            return value > 0 ? percentage : '';
                         }
                     }
                 }
@@ -350,29 +369,25 @@
      * Popula a tabela com as reivindicações filtradas.
      * @param {Array} reivindicacoesFiltradas - Lista de reivindicações a serem exibidas.
      */
-    function popularTabela(reivindicacoesFiltradas) {
+     function popularTabela(reivindicacoesFiltradas) {
         const tbody = document.getElementById('reivindicacoesBody');
         tbody.innerHTML = ''; // Limpa a tabela
 
         if (reivindicacoesFiltradas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma reivindicação encontrada com os filtros aplicados.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma reivindicação encontrada.</td></tr>';
             return;
         }
 
         reivindicacoesFiltradas.forEach(item => {
             const tr = document.createElement('tr');
-            let statusClass = '';
-            if (item.statusReivindicacao.toLowerCase() === 'pendente') statusClass = 'status-pendente';
-            else if (item.statusReivindicacao.toLowerCase() === 'concluída') statusClass = 'status-concluida';
-
+            // A tabela agora é mais limpa e usa as novas colunas
             tr.innerHTML = `
                 <td>${item.idReivindicacao}</td>
-                <td class="${statusClass}">${item.statusReivindicacao}</td>
                 <td>${new Date(item.dataReivindicacao).toLocaleString()}</td>
                 <td>${item.prioridadeCalculada.toFixed(2)}</td>
-                <td>${item.idDoacao}</td>
-                <td>${item.statusDoacao}</td>
                 <td>${item.nomeAlimento}</td>
+                <td>${item.nomeDoador}</td>
+                <td><strong>${item.resultadoFinal}</strong></td>
             `;
             tbody.appendChild(tr);
         });
@@ -382,27 +397,25 @@
      * Carrega as reivindicações da API e as exibe.
      * Aplica filtros e atualiza os gráficos e a tabela.
      */
-    async function carregarReivindicacoes() {
+     async function carregarReivindicacoes(idOng) { // A função agora recebe o id da ONG
         try {
-            const resposta = await fetch(`/api/ong/reivindicacoes?idOng=${idOng}`);
+            const resposta = await fetch(`/api/relatorios?tipo=ONG&id=${idOng}`);
             const dados = await resposta.json();
 
             if (!dados.success) {
-                document.getElementById('alertContainer').innerHTML =
-                    `<div class="alert alert-danger">${dados.message || 'Erro ao carregar reivindicações.'}</div>`;
+                document.getElementById('alertContainer').innerHTML = `<div class="alert alert-danger">${dados.message || 'Erro ao carregar relatório.'}</div>`;
                 return;
             }
+            
+            allReivindicacoes = dados.relatorio; 
 
-            allReivindicacoes = dados.reivindicacoes; // Armazena todos os dados brutos
-
-            aplicarFiltros(); // Aplica os filtros iniciais (todos os dados)
-            atualizarCardsResumo(allReivindicacoes); // Atualiza os cards com todos os dados
-            renderChartStatus(allReivindicacoes); // Renderiza o gráfico de status com todos os dados
-            renderChartPrioridade(allReivindicacoes); // Renderiza o gráfico de prioridade com todos os dados
+            aplicarFiltros(); 
+            atualizarCardsResumo(allReivindicacoes);
+            renderChartStatus(allReivindicacoes);
+            renderChartPrioridade(allReivindicacoes);
 
         } catch (error) {
-            document.getElementById('alertContainer').innerHTML =
-                `<div class="alert alert-danger">Erro ao carregar reivindicações. Tente novamente mais tarde.</div>`;
+            document.getElementById('alertContainer').innerHTML = `<div class="alert alert-danger">Erro de comunicação ao carregar relatório.</div>`;
             console.error(error);
         }
     }
@@ -410,21 +423,23 @@
     /**
      * Aplica os filtros selecionados e atualiza a tabela.
      */
-    function aplicarFiltros() {
-        let reivindicacoesFiltradas = [...allReivindicacoes]; // Cria uma cópia para filtrar
+     function aplicarFiltros() {
+        let reivindicacoesFiltradas = [...allReivindicacoes];
 
         const filtroStatus = document.getElementById('filtroStatus').value;
         const filtroDataInicio = document.getElementById('filtroDataInicio').value;
         const filtroDataFim = document.getElementById('filtroDataFim').value;
 
         if (filtroStatus) {
-            reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item =>
-                item.statusReivindicacao.toLowerCase() === filtroStatus.toLowerCase()
+            // A lógica de filtro agora usa a coluna 'resultadoFinal'
+            reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => 
+                item.resultadoFinal === filtroStatus
             );
         }
 
         if (filtroDataInicio) {
-            const dataInicio = new Date(filtroDataInicio + 'T00:00:00'); // Adiciona T00:00:00 para garantir a data correta
+            // ... a lógica de filtro de data continua a mesma
+            const dataInicio = new Date(filtroDataInicio + 'T00:00:00');
             reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => {
                 const dataReivindicacao = new Date(item.dataReivindicacao);
                 return dataReivindicacao >= dataInicio;
@@ -432,7 +447,8 @@
         }
 
         if (filtroDataFim) {
-            const dataFim = new Date(filtroDataFim + 'T23:59:59'); // Adiciona T23:59:59 para incluir o dia inteiro
+            // ... a lógica de filtro de data continua a mesma
+            const dataFim = new Date(filtroDataFim + 'T23:59:59');
             reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => {
                 const dataReivindicacao = new Date(item.dataReivindicacao);
                 return dataReivindicacao <= dataFim;

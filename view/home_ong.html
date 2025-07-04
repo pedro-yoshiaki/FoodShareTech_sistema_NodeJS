@@ -33,10 +33,10 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link active" href="/home_ong">Home ONG</a></li>
-        <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong">Confirmar Coleta</a></li>
-        <li class="nav-item"><a class="nav-link" href="/relatorio_ong">Relatório</a></li>
-        <li class="nav-item"><a class="nav-link" href="/perfil_ong">Perfil ONG</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/home_ong.html">Home ONG</a></li>
+        <li class="nav-item"><a class="nav-link" href="/confirmar_entrega_ong.html">Confirmar Coleta</a></li>
+        <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
+        <li class="nav-item"><a class="nav-link" href="/perfil_ong.html">Perfil ONG</a></li>
       </ul>
     </div>
   </div>
@@ -67,86 +67,148 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const idOng = 3; // Substitua pelo ID da ONG logada
-  let doacaoSelecionada = null;
+// O evento 'DOMContentLoaded' garante que todo o HTML da página foi carregado antes de o script rodar.
+document.addEventListener('DOMContentLoaded', () => {
 
-  async function carregarDoacoes() {
+// --- Bloco de Verificação de Autenticação ---
+const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
+
+if (!usuarioLogado || usuarioLogado.tipo !== 'ONG') {
+    alert('Acesso não autorizado. Você precisa estar logado como uma ONG.');
+    window.location.href = 'login.html';
+    return; // Interrompe a execução aqui se o usuário não for válido
+}
+// --- Fim do Bloco de Verificação ---
+
+// Agora, estas variáveis só são declaradas se o usuário for válido
+const idOng = usuarioLogado.perfilId;
+let doacaoSelecionada = null;
+
+const doacoesContainer = document.getElementById('doacoes-container');
+const btnReivindicar = document.getElementById('btnReivindicar');
+
+// --- Definição das Funções ---
+async function carregarDoacoes() {
     try {
-      const response = await fetch('/api/doacoes'); // Endpoint de listagem
-      const dados = await response.json();
-      const container = document.getElementById('doacoes-container');
+        const response = await fetch(`/api/doacoes/disponiveis?idOng=${idOng}`);
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+        }
+        const doacoes = await response.json();
+        
+        if (doacoes.length === 0) {
+            doacoesContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning">Nenhuma doação disponível no momento.</div></div>`;
+            return;
+        }
 
-      if (!dados.success || !dados.doacoes) {
-        container.innerHTML = `<div class="alert alert-warning">Nenhuma doação disponível no momento.</div>`;
-        return;
-      }
+        doacoesContainer.innerHTML = doacoes.map(doacao => {
+              // Cria o HTML do badge SE a doação já foi reivindicada
+              const badgeHtml = doacao.jaReivindicado 
+                ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Lance Feito</span>' 
+                : '';
 
-      container.innerHTML = dados.doacoes.map(doacao => `
-          <div class="col-md-4">
-            <div class="card h-100">
-              <div class="card-body">
-                <h5 class="card-title">${doacao.nomeAlimento}</h5>
-                <p class="card-text">
-                  <i class="fas fa-box me-2"></i> Quantidade: ${doacao.quantidade}<br>
-                  <i class="fas fa-calendar me-2"></i> Validade: ${new Date(doacao.validade).toLocaleDateString()}<br>
-                  <i class="fas fa-check-circle me-2"></i> Status: ${doacao.statusDoacao}
-                </p>
-                <div class="mt-3">
-                  <button class="btn btn-outline-success" onclick='abrirModal(${JSON.stringify(doacao)})'>
-                    Ver Detalhes
-                  </button>
+            return `
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        ${badgeHtml} 
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${doacao.nomeAlimento}</h5>
+                            <p class="card-text">
+                                <i class="fas fa-box me-2"></i> Qtd: ${doacao.quantidadeDoacao}<br>
+                                <i class="fas fa-calendar-times me-2"></i> Validade: ${new Date(doacao.validade).toLocaleDateString()}<br>
+                                <i class="fas fa-hourglass-half me-2"></i> Lances até: ${doacao.tempoReivindicacao}
+                            </p>
+                            <div class="mt-auto">
+                                <button class="btn btn-outline-success" onclick="abrirModal(${doacao.idDoacao})">
+                                    Ver Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        `).join('');
+            `;
+        }).join('');
+
     } catch (error) {
-      console.error(error);
-      document.getElementById('doacoes-container').innerHTML = `<div class="alert alert-danger">Erro ao carregar doações.</div>`;
+        console.error('Erro ao carregar doações:', error);
+        doacoesContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger">Erro ao carregar doações.</div></div>`;
     }
-  }
+}
 
-  function abrirModal(doacao) {
-    doacaoSelecionada = doacao;
-    document.querySelector('#doacaoModal .modal-title').textContent = doacao.nomeAlimento;
-    document.querySelector('#doacaoModal .modal-body').innerHTML = `
-        <p><strong>ID da Doação:</strong> ${doacao.idDoacao}</p>
-        <p><strong>Categoria:</strong> ${doacao.categoria || 'Não especificada'}</p>
-        <p><strong>Validade:</strong> ${new Date(doacao.validade).toLocaleDateString()}</p>
-        <p><strong>Status:</strong> ${doacao.statusDoacao}</p>
-      `;
-    new bootstrap.Modal(document.getElementById('doacaoModal')).show();
-  }
+// A função abrirModal deve ser anexada ao objeto 'window' para ser acessível pelo 'onclick' do HTML
+window.abrirModal = async function(idDoacao) {
+    doacaoSelecionada = { idDoacao };
+    
+    const modal = new bootstrap.Modal(document.getElementById('doacaoModal'));
+    const modalTitle = document.querySelector('#doacaoModal .modal-title');
+    const modalBody = document.querySelector('#doacaoModal .modal-body');
 
-  document.getElementById('btnReivindicar').addEventListener('click', async () => {
+    modalTitle.textContent = 'Carregando Detalhes...';
+    modalBody.innerHTML = '<div class="text-center"><div class="spinner-border text-success" role="status"></div></div>';
+    modal.show();
+
+    try {
+        const response = await fetch(`/api/doacoes/${idDoacao}`);
+        if (!response.ok) throw new Error('Não foi possível carregar os detalhes.');
+        
+        const doacaoDetalhada = await response.json();
+        doacaoSelecionada = doacaoDetalhada;
+
+        modalTitle.textContent = doacaoDetalhada.nomeAlimento;
+        modalBody.innerHTML = `
+            <p><strong>Doador:</strong> ${doacaoDetalhada.nomeDoador}</p>
+            <p><strong>Categoria:</strong> ${doacaoDetalhada.categoria || 'Não especificada'}</p>
+            <p><strong>Quantidade:</strong> ${doacaoDetalhada.quantidadeDoacao} ${doacaoDetalhada.unidadeMedida || ''}</p>
+            <p><strong>Validade:</strong> ${new Date(doacaoDetalhada.validade).toLocaleDateString()}</p>
+            <p><strong>Status:</strong> ${doacaoDetalhada.statusDoacao}</p>
+
+            <hr>
+            
+            <p><strong>Endereço de Coleta:</strong></p>
+            <p>
+                ${doacaoDetalhada.logradouro}, ${doacaoDetalhada.numero}<br>
+                ${doacaoDetalhada.bairro} - ${doacaoDetalhada.cidade}/${doacaoDetalhada.estado}
+            </p>
+        `;
+    } catch (error) {
+        console.error('Erro ao buscar detalhes da doação:', error);
+        modalBody.innerHTML = '<div class="alert alert-danger">Erro ao carregar os detalhes.</div>';
+    }
+}
+
+// --- Adição do Event Listener para o Botão de Reivindicar ---
+btnReivindicar.addEventListener('click', async () => {
     if (!doacaoSelecionada) return;
 
     const payload = {
-      idOng: idOng,
-      idDoacao: doacaoSelecionada.idDoacao
+        idOng: idOng,
+        idDoacao: doacaoSelecionada.idDoacao
     };
 
     try {
-      const resposta = await fetch('/api/reivindicacoes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+        const resposta = await fetch('/api/reivindicacoes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const resultado = await resposta.json();
 
-      const resultado = await resposta.json();
-
-      if (resultado.success) {
-        alert('Doação reivindicada com sucesso!');
-        window.location.reload();
-      } else {
-        alert('Erro ao reivindicar: ' + resultado.message);
-      }
+        if (resultado.success) {
+            alert('Doação reivindicada com sucesso!');
+            window.location.reload();
+        } else {
+            alert('Erro ao reivindicar: ' + (resultado.message || 'Tente novamente.'));
+        }
     } catch (err) {
-      alert('Erro ao enviar reivindicação.');
+        alert('Erro ao enviar reivindicação.');
     }
-  });
+});
 
-  document.addEventListener('DOMContentLoaded', carregarDoacoes);
+// --- Chamada Inicial ---
+// A chamada para carregar as doações agora está segura dentro do evento
+carregarDoacoes();
+});
 </script>
 </body>
 </html>

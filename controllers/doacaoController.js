@@ -80,24 +80,17 @@ export const detalharDoacao = (req, res) => {
   const sql = `
     SELECT
         -- Colunas da tabela Doacao
-        d.idDoacao,
-        d.dataDoacao,
-        d.quantidadeDoacao,
-        d.validade,
-        d.statusDoacao,
-        d.tempoReivindicacao,
-        d.dataColeta,      -- Adicionada de volta
-        d.horaColeta,      -- Adicionada de volta
-        d.statusColeta,    -- Adicionada de volta
+        d.idDoacao, d.dataDoacao, d.quantidadeDoacao, d.validade, d.statusDoacao,
+        d.tempoReivindicacao, d.dataColeta, d.horaColeta, d.statusColeta,
         
-        -- Colunas da tabela Alimento (sem o id_alimento)
-        a.nomeAlimento,
-        a.categoria,
-        a.unidadeMedida,
-        a.prioridade,
+        -- Colunas da tabela Alimento
+        a.nomeAlimento, a.categoria, a.unidadeMedida, a.prioridade,
         
         -- Nome do Doador vindo da tabela Usuario
-        u.nome AS nomeDoador
+        u.nome AS nomeDoador,
+
+        -- COLUNAS DO ENDEREÇO
+        e.logradouro, e.numero, e.bairro, e.cidade, e.estado
     FROM
         Doacao d
     LEFT JOIN
@@ -106,6 +99,8 @@ export const detalharDoacao = (req, res) => {
         Doador doador ON d.fk_doador_id = doador.idDoador
     LEFT JOIN 
         Usuario u ON doador.fk_usuario_id = u.id_usuario
+    LEFT JOIN -- ADICIONADO: junta com a tabela Endereco para pegar o endereço do doador
+        Endereco e ON u.id_usuario = e.fk_usuario_id
     WHERE
         d.idDoacao = ?
   `;
@@ -120,15 +115,31 @@ export const detalharDoacao = (req, res) => {
 
 // 4. Listar doações com status 'Disponível' e tempo de reivindicação ativo
 export const listarDoacoesDisponiveis = (req, res) => {
-    const sql = `SELECT * FROM view_doacoes_disponiveis`;
-  
-    conexao.query(sql, (err, resultados) => {
+  // A função agora recebe o ID da ONG logada pela query string
+  const { idOng } = req.query;
+
+  if (!idOng) {
+      return res.status(400).json({ success: false, message: "ID da ONG é obrigatório para listar doações." });
+  }
+
+  // A consulta agora usa LEFT JOIN para verificar se existe uma reivindicação da ONG logada
+  const sql = `
+      SELECT 
+          v.*,
+          -- Cria uma coluna virtual 'jaReivindicado' (1 para sim, 0 para não)
+          CASE WHEN r.idReivindicacao IS NOT NULL THEN TRUE ELSE FALSE END AS jaReivindicado
+      FROM 
+          view_doacoes_disponiveis v
+      LEFT JOIN
+          Reivindicacao r ON v.idDoacao = r.fk_doacao_id AND r.fk_ong_id = ?
+  `;
+
+  conexao.query(sql, [idOng], (err, resultados) => {
       if (err) {
-        console.error('Erro ao buscar doações disponíveis:', err);
-        return res.status(500).json({ error: 'Erro ao buscar doações disponíveis' });
+          console.error('Erro ao buscar doações disponíveis:', err);
+          return res.status(500).json({ error: 'Erro ao buscar doações disponíveis' });
       }
-  
       return res.status(200).json(resultados);
-    });
-  };
+  });
+};
   
