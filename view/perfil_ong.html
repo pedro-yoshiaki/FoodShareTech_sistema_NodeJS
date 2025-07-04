@@ -22,7 +22,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="/home_ong.html">Home ONG</a></li>
-                <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong.html">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link" href="/confirmar_entrega_ong.html">Confirmar Coleta</a></li>
                 <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
                 <li class="nav-item"><a class="nav-link active" href="/perfil_ong.html">Perfil ONG</a></li>
             </ul>
@@ -80,12 +80,24 @@
 </div>
 
 <script>
-    const idOng = 1; // Trocar para id real da ONG logada
+    // --- Bloco de Verificação de Autenticação ---
+    const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+    const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
+
+    if (!usuarioLogado || usuarioLogado.tipo !== 'ONG') {
+        alert('Acesso não autorizado. Você precisa estar logado como uma ONG.');
+        window.location.href = '/login.html';
+    }
+    // --- Fim do Bloco de Verificação ---
+
+    // Pega o ID do usuário base, que é o que a API espera
+    const idUsuarioLogado = usuarioLogado.id_usuario;
 
     // Carrega os dados do perfil ONG
     async function carregarPerfil() {
         try {
-            const resposta = await fetch(`/api/usuarios/me?idOng=${idOng}`);
+            // CORREÇÃO: Usa a URL e o parâmetro corretos ('id' em vez de 'idOng')
+            const resposta = await fetch(`/api/usuarios/me?id=${idUsuarioLogado}`);
             const dados = await resposta.json();
 
             if (!dados.success) {
@@ -93,6 +105,7 @@
                 return;
             }
 
+            // Preenche o formulário com os dados recebidos
             document.getElementById('nome').value = dados.usuario.nome;
             document.getElementById('email').value = dados.usuario.email;
             document.getElementById('estado').value = dados.endereco.estado;
@@ -102,7 +115,7 @@
             document.getElementById('numero').value = dados.endereco.numero;
 
             const contatosContainer = document.getElementById('contatosContainer');
-            contatosContainer.innerHTML = '';
+            contatosContainer.innerHTML = ''; // Limpa contatos antigos
             dados.contatos.forEach(contato => {
                 const input = document.createElement('input');
                 input.type = 'text';
@@ -149,14 +162,15 @@
         };
 
         try {
-            const resposta = await fetch('/api/usuarios/me', {
+            // CORREÇÃO: Adiciona o ID do usuário à URL da requisição PUT
+            const resposta = await fetch(`/api/usuarios/me?id=${idUsuarioLogado}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dadosAtualizados)
             });
 
             const resultado = await resposta.json();
-            alert(resultado.message || (resultado.success ? 'Perfil atualizado!' : 'Erro ao atualizar'));
+            alert(resultado.message || (resultado.success ? 'Perfil atualizado com sucesso!' : 'Erro ao atualizar'));
         } catch (error) {
             alert('Erro ao atualizar perfil.');
             console.error(error);
@@ -167,12 +181,14 @@
     document.getElementById('btnExcluirConta').addEventListener('click', async () => {
         if (confirm('Tem certeza que deseja excluir sua conta? Essa ação não poderá ser desfeita.')) {
             try {
-                const resposta = await fetch('/api/usuarios/me', { method: 'DELETE' });
+                // CORREÇÃO: Adiciona o ID do usuário à URL da requisição DELETE
+                const resposta = await fetch(`/api/usuarios/me?id=${idUsuarioLogado}`, { method: 'DELETE' });
                 const resultado = await resposta.json();
 
                 if (resultado.success) {
                     alert('Conta excluída com sucesso!');
-                    window.location.href = '/login';
+                    localStorage.removeItem('usuarioLogado'); // Limpa os dados do usuário do navegador
+                    window.location.href = '/login.html'; // Redireciona para o login
                 } else {
                     alert('Erro ao excluir a conta.');
                 }
@@ -183,7 +199,7 @@
         }
     });
 
-    // Carrega perfil ao iniciar página
+    // Carrega o perfil assim que a página é iniciada
     carregarPerfil();
 </script>
 
