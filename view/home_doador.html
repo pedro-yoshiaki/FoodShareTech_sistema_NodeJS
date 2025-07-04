@@ -18,9 +18,9 @@
         <a class="navbar-brand" href="#">FoodShareTech</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link active" href="/home_doador">Home</a></li>
-                <li class="nav-item"><a class="nav-link " href="/confirmar_coleta_doador">Confirmar Coleta</a></li>
-                <li class="nav-item"><a class="nav-link" href="/perfil_doador">Perfil</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/home_doador.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link " href="/confirmar_coleta_doador.html">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil_doador.html">Perfil</a></li>
             </ul>
         </div>
     </div>
@@ -87,9 +87,23 @@
 </div>
 
 <script>
-    const idDoador = 1; // substituir por ID real da sessão
+        // O evento 'DOMContentLoaded' garante que todo o HTML da página foi carregado antes de o script rodar.
+    document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Bloco de Verificação de Autenticação ---
+    const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+    const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
+
+    if (!usuarioLogado || usuarioLogado.tipo !== 'Doador') {
+        alert('Acesso não autorizado. Você precisa estar logado como um Doador.');
+        window.location.href = 'login.html';
+        return; // Interrompe a execução aqui se o usuário não for válido
+        }
+
+    const idDoador = usuarioLogado.perfilId;
 
     async function carregarDoacoes() {
+        try{
         const resposta = await fetch(`/api/relatorios?tipo=Doador&id=${idDoador}`);
         const dados = await resposta.json();
 
@@ -101,18 +115,24 @@
                 const card = document.createElement('div');
                 card.className = 'col-md-6';
                 card.innerHTML = `
-          <div class="card mb-3">
-            <div class="card-body">
-              <h5 class="card-title">${doacao.nomeAlimento}</h5>
-              <p class="card-text">Quantidade: ${doacao.quantidadeDoacao}</p>
-              <p class="card-text">Validade: ${new Date(doacao.validade).toLocaleDateString()}</p>
-              <p class="card-text">Categoria: ${doacao.categoria}</p>
-              <p class="card-text"><strong>Status:</strong> ${doacao.statusDoacao}</p>
-            </div>
-          </div>
-        `;
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                    <h5 class="card-title">${doacao.nomeAlimento}</h5>
+                                    <p class="card-text">Quantidade: ${doacao.quantidadeDoacao}</p>
+                                    <p class="card-text">Validade: ${new Date(doacao.validade).toLocaleDateString()}</p>
+                                    <p class="card-text">Categoria: ${doacao.categoria}</p>
+                                    <p class="card-text"><strong>Status:</strong> ${doacao.statusDoacao}</p>
+                                    </div>
+                                </div>
+                                `;
                 container.appendChild(card);
-            });
+            }); 
+            }   else {
+                container.innerHTML = '<p class="text-muted">Nenhuma doação encontrada no seu histórico.</p>';
+            }
+        } catch(error){
+            console.error("Erro ao carregar doações:", error);
+            document.getElementById('listaDoacoes').innerHTML = '<p class="text-danger">Falha ao carregar histórico de doações.</p>';
         }
     }
 
@@ -120,33 +140,42 @@
         e.preventDefault();
 
         const novaDoacao = {
-            titulo: document.getElementById('nomeAlimento').value,
-            quantidade: document.getElementById('quantidade').value,
+            id_doador: idDoador, // Nome do campo corrigido
+            quantidadeDoacao: parseInt(document.getElementById('quantidade').value), // Nome do campo corrigido e convertido para número
             validade: document.getElementById('validade').value,
-            categoria: document.getElementById('categoria').value,
-            unidadeMedida: document.getElementById('unidadeMedida').value,
-            prioridade: parseInt(document.getElementById('prioridade').value),
-            doador_id: idDoador
+            alimento: {
+                nomeAlimento: document.getElementById('nomeAlimento').value, // Nome do campo corrigido
+                categoria: document.getElementById('categoria').value,
+                unidadeMedida: document.getElementById('unidadeMedida').value,
+                prioridade: parseInt(document.getElementById('prioridade').value)
+            }
         };
 
-        const resposta = await fetch('/api/doacoes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(novaDoacao)
-        });
+        try {
+            const resposta = await fetch('/api/doacoes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novaDoacao)
+            });
 
-        const resultado = await resposta.json();
+            const resultado = await resposta.json();
 
-        if (resultado.success) {
-            alert("Doação cadastrada com sucesso!");
-            document.getElementById('formDoacao').reset();
-            carregarDoacoes();
-        } else {
-            alert("Erro ao cadastrar doação.");
+            if (resultado.success) {
+                alert("Doação cadastrada com sucesso!");
+                document.getElementById('formDoacao').reset();
+                carregarDoacoes();
+            } else {
+                alert("Erro ao cadastrar doação.");
+            }
+        } catch (error){
+            console.error("Erro ao enviar doação:", error);
+            alert("Erro de comunicação ao cadastrar doação.");
         }
     });
 
     carregarDoacoes();
+});
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
