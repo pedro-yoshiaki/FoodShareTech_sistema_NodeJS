@@ -1,73 +1,165 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home ONG - FoodShareTech</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home ONG - FoodShareTech</title>
 
-    body {
-      padding-top: 70px;
-    }
+    <!-- Fonte e CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-    .card {
-      transition: transform 0.3s;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-
-  </style>
+    <style>
+        /* Cores temáticas: bege suave, marrom terroso, acentos de laranja */
+        :root {
+            --bg-base: #f7f3ec;
+            --text-base: #4b4636;
+            --accent: #d87f33;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(75, 70, 54, 0.1);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-base);
+            padding-top: 80px;
+        }
+        /* Navbar ONG estilizada */
+        .navbar-ong {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid #ddd;
+            padding: 0.75rem 1rem;
+        }
+        .navbar-ong .navbar-brand {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.75rem;
+        }
+        .navbar-ong .nav-link {
+            color: var(--text-base) !important;
+            font-weight: 500;
+            margin-left: 1rem;
+            transition: color .2s;
+        }
+        .navbar-ong .nav-link.active,
+        .navbar-ong .nav-link:hover {
+            color: var(--accent) !important;
+        }
+        /* Seção de doações */
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: '';
+            width: 50px;
+            height: 4px;
+            background: var(--accent);
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            border-radius: 2px;
+        }
+        /* Cartões simples em grid */
+        .card-doacao-ong {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            transition: transform .3s, box-shadow .3s;
+        }
+        .card-doacao-ong:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--card-shadow);
+        }
+        .card-doacao-ong .card-body {
+            padding: 1.25rem;
+        }
+        .card-doacao-ong .card-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: .75rem;
+        }
+        .card-doacao-ong .card-text {
+            font-size: .95rem;
+            margin-bottom: 1rem;
+        }
+        .btn-ong {
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+            padding: .5rem 1rem;
+            font-weight: 600;
+            transition: background .2s;
+        }
+        .btn-ong:hover {
+            background: #b66328;
+        }
+        /* Modal customizado */
+        .modal-content {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .modal-header {
+            background: var(--accent);
+            color: #fff;
+            border-bottom: none;
+        }
+        .modal-footer {
+            border-top: none;
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
-  <div class="container">
-    <a class="navbar-brand" href="#">Sistema de Doações</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link active" href="/home_ong.html">Home ONG</a></li>
-        <li class="nav-item"><a class="nav-link" href="/confirmar_entrega_ong.html">Confirmar Coleta</a></li>
-        <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
-        <li class="nav-item"><a class="nav-link" href="/perfil_ong.html">Perfil ONG</a></li>
-      </ul>
+
+<!-- Navbar ONG -->
+<nav class="navbar navbar-expand-lg navbar-ong fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/home_ong">FoodShareTech</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navOng" aria-label="Alternar navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navOng">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="/home_ong.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong.html">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil_ong.html">Perfil</a></li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
-
-<div class="container mt-4">
-  <h2 class="mb-4">Doações Disponíveis</h2>
-  <div class="row g-4" id="doacoes-container"></div>
+<div class="container mt-5">
+    <h2 class="section-title">Doações Disponíveis</h2>
+    <div class="row g-4" id="doacoes-container">
+        </div>
 </div>
 
-<!-- Modal de detalhes -->
+<!-- Modal Detalhes -->
 <div class="modal fade" id="doacaoModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Detalhes da Doação</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-success" id="btnReivindicar">Reivindicar Doação</button>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Doação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button class="btn btn-ong" id="btnReivindicar">Reivindicar</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// O evento 'DOMContentLoaded' garante que todo o HTML da página foi carregado antes de o script rodar.
+// Envolve toda a lógica no DOMContentLoaded para garantir que o HTML esteja pronto
 document.addEventListener('DOMContentLoaded', () => {
 
 // --- Bloco de Verificação de Autenticação ---
@@ -77,51 +169,58 @@ const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : nu
 if (!usuarioLogado || usuarioLogado.tipo !== 'ONG') {
     alert('Acesso não autorizado. Você precisa estar logado como uma ONG.');
     window.location.href = 'login.html';
-    return; // Interrompe a execução aqui se o usuário não for válido
+    return; 
 }
-// --- Fim do Bloco de Verificação ---
 
-// Agora, estas variáveis só são declaradas se o usuário for válido
+// --- Variáveis e Elementos Globais (dentro do escopo seguro) ---
 const idOng = usuarioLogado.perfilId;
 let doacaoSelecionada = null;
-
 const doacoesContainer = document.getElementById('doacoes-container');
 const btnReivindicar = document.getElementById('btnReivindicar');
 
-// --- Definição das Funções ---
+// --- Funções Principais ---
+
 async function carregarDoacoes() {
     try {
+        // Pega o ID da ONG logada que já temos no escopo
+        const idOng = usuarioLogado.perfilId;
         const response = await fetch(`/api/doacoes/disponiveis?idOng=${idOng}`);
+        
         if (!response.ok) {
             throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
         }
+
         const doacoes = await response.json();
-        
+        const container = document.getElementById('doacoes-container');
+        container.innerHTML = '';
+
         if (doacoes.length === 0) {
-            doacoesContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning">Nenhuma doação disponível no momento.</div></div>`;
+            container.innerHTML = `<div class="col-12"><div class="alert alert-info">Nenhuma doação disponível no momento.</div></div>`;
             return;
         }
 
-        doacoesContainer.innerHTML = doacoes.map(doacao => {
-              // Cria o HTML do badge SE a doação já foi reivindicada
-              const badgeHtml = doacao.jaReivindicado 
-                ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Lance Feito</span>' 
+        // A alteração está no HTML gerado dentro do .map()
+        container.innerHTML = doacoes.map(doacao => {
+            const badgeHtml = doacao.jaReivindicado 
+                ? '<span class="badge bg-success position-absolute top-0 end-0 m-2">Lance Feito</span>' 
                 : '';
 
             return `
                 <div class="col-md-4">
-                    <div class="card h-100">
-                        ${badgeHtml} 
+                    <div class="card card-doacao-ong h-100">
+                        ${badgeHtml}
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">${doacao.nomeAlimento}</h5>
+                            
                             <p class="card-text">
                                 <i class="fas fa-box me-2"></i> Qtd: ${doacao.quantidadeDoacao}<br>
                                 <i class="fas fa-calendar-times me-2"></i> Validade: ${new Date(doacao.validade).toLocaleDateString()}<br>
                                 <i class="fas fa-hourglass-half me-2"></i> Lances até: ${doacao.tempoReivindicacao}
                             </p>
+                            
                             <div class="mt-auto">
-                                <button class="btn btn-outline-success" onclick="abrirModal(${doacao.idDoacao})">
-                                    Ver Detalhes
+                                <button class="btn btn-ong w-100" onclick="abrirModal(${doacao.idDoacao})">
+                                    Ver Detalhes e Reivindicar
                                 </button>
                             </div>
                         </div>
@@ -132,25 +231,27 @@ async function carregarDoacoes() {
 
     } catch (error) {
         console.error('Erro ao carregar doações:', error);
-        doacoesContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger">Erro ao carregar doações.</div></div>`;
+        document.getElementById('doacoes-container').innerHTML = `<div class="col-12"><div class="alert alert-danger">Erro ao carregar doações.</div></div>`;
     }
 }
 
-// A função abrirModal deve ser anexada ao objeto 'window' para ser acessível pelo 'onclick' do HTML
+// Função para abrir o modal, agora ligada ao objeto window para ser acessível pelo onclick
 window.abrirModal = async function(idDoacao) {
-    doacaoSelecionada = { idDoacao };
+    doacaoSelecionada = { idDoacao }; 
     
     const modal = new bootstrap.Modal(document.getElementById('doacaoModal'));
     const modalTitle = document.querySelector('#doacaoModal .modal-title');
     const modalBody = document.querySelector('#doacaoModal .modal-body');
+    const reivindicarBtn = document.getElementById('btnReivindicar');
 
-    modalTitle.textContent = 'Carregando Detalhes...';
+    modalTitle.textContent = 'Carregando...';
     modalBody.innerHTML = '<div class="text-center"><div class="spinner-border text-success" role="status"></div></div>';
+    reivindicarBtn.disabled = true; // Desabilita o botão enquanto carrega
     modal.show();
 
     try {
         const response = await fetch(`/api/doacoes/${idDoacao}`);
-        if (!response.ok) throw new Error('Não foi possível carregar os detalhes.');
+        if (!response.ok) throw new Error('Falha ao carregar detalhes.');
         
         const doacaoDetalhada = await response.json();
         doacaoSelecionada = doacaoDetalhada;
@@ -158,28 +259,26 @@ window.abrirModal = async function(idDoacao) {
         modalTitle.textContent = doacaoDetalhada.nomeAlimento;
         modalBody.innerHTML = `
             <p><strong>Doador:</strong> ${doacaoDetalhada.nomeDoador}</p>
-            <p><strong>Categoria:</strong> ${doacaoDetalhada.categoria || 'Não especificada'}</p>
             <p><strong>Quantidade:</strong> ${doacaoDetalhada.quantidadeDoacao} ${doacaoDetalhada.unidadeMedida || ''}</p>
             <p><strong>Validade:</strong> ${new Date(doacaoDetalhada.validade).toLocaleDateString()}</p>
-            <p><strong>Status:</strong> ${doacaoDetalhada.statusDoacao}</p>
-
             <hr>
-            
-            <p><strong>Endereço de Coleta:</strong></p>
-            <p>
-                ${doacaoDetalhada.logradouro}, ${doacaoDetalhada.numero}<br>
-                ${doacaoDetalhada.bairro} - ${doacaoDetalhada.cidade}/${doacaoDetalhada.estado}
-            </p>
+            <p><strong>Endereço de Coleta:</strong><br>
+            ${doacaoDetalhada.logradouro}, ${doacaoDetalhada.numero} - ${doacaoDetalhada.bairro}, ${doacaoDetalhada.cidade}/${doacaoDetalhada.estado}</p>
         `;
+        
+        // Reabilita o botão de reivindicar apenas se a ONG ainda não tiver feito um lance
+        reivindicarBtn.disabled = doacaoDetalhada.jaReivindicado;
+
     } catch (error) {
-        console.error('Erro ao buscar detalhes da doação:', error);
         modalBody.innerHTML = '<div class="alert alert-danger">Erro ao carregar os detalhes.</div>';
     }
 }
 
-// --- Adição do Event Listener para o Botão de Reivindicar ---
+// Event listener para o botão de reivindicar do modal
 btnReivindicar.addEventListener('click', async () => {
     if (!doacaoSelecionada) return;
+
+    btnReivindicar.disabled = true; // Desabilita para evitar cliques duplos
 
     const payload = {
         idOng: idOng,
@@ -194,19 +293,20 @@ btnReivindicar.addEventListener('click', async () => {
         });
         const resultado = await resposta.json();
 
+        alert(resultado.message || (resultado.success ? 'Reivindicação enviada com sucesso!' : 'Ocorreu um erro.'));
         if (resultado.success) {
-            alert('Doação reivindicada com sucesso!');
-            window.location.reload();
+            bootstrap.Modal.getInstance(document.getElementById('doacaoModal')).hide();
+            carregarDoacoes(); // Recarrega os cards para exibir o badge "Lance Feito"
         } else {
-            alert('Erro ao reivindicar: ' + (resultado.message || 'Tente novamente.'));
+            btnReivindicar.disabled = false; // Reabilita o botão em caso de erro
         }
     } catch (err) {
-        alert('Erro ao enviar reivindicação.');
+        alert('Erro de comunicação ao enviar reivindicação.');
+        btnReivindicar.disabled = false;
     }
 });
 
 // --- Chamada Inicial ---
-// A chamada para carregar as doações agora está segura dentro do evento
 carregarDoacoes();
 });
 </script>
