@@ -4,21 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FoodShareTech - Confirmar Coleta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
-        body { padding-top: 56px; }
-        nav .nav-link.active { font-weight: bold; }
-        #avaliacaoForm { display: none; margin-top: 1rem; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 70px;
+        }
+        .navbar {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #ffc107 !important;
+        }
+        .list-group-item {
+            border-radius: .5rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            margin-bottom: .75rem;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        #avaliacaoForm {
+            display: none;
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: .75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
-
-<!-- Navbar topo -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="#">FoodShareTech</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
+        <a class="navbar-brand text-primary" href="#">FoodShareTech</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="/home_doador.html">Home</a></li>
                 <li class="nav-item"><a class="nav-link active" href="/confirmar_coleta_doador.html">Confirmar Coleta</a></li>
                 <li class="nav-item"><a class="nav-link" href="/perfil_doador.html">Perfil</a></li>
@@ -28,11 +61,11 @@
 </nav>
 
 <div class="container mt-4">
-    <h2>Reivindicações Pendentes de Confirmação</h2>
-    <div id="listaReivindicacoes" class="list-group mb-3"></div>
+    <h2 class="mb-4">Reivindicações Pendentes de Confirmação</h2>
+    <div id="listaReivindicacoes" class="list-group mb-4"></div>
 
     <div id="avaliacaoForm">
-        <h3>Avaliar ONG</h3>
+        <h4 class="mb-3">Avaliar ONG</h4>
         <form id="formAvaliacao">
             <input type="hidden" id="idOng" />
             <div class="mb-3">
@@ -59,8 +92,7 @@
     let reivindicacaoParaAvaliar = null;
 
     async function carregarReivindicacoes() {
-        // Exemplo: GET /api/reivindicacoes/pending?usuarioId=1
-        const res = await fetch('/api/reivindicacoes/pending?usuarioId=1'); // Ajuste ID logado
+        const res = await fetch('/api/reivindicacoes/pending?usuarioId=1');
         const dados = await res.json();
 
         const lista = document.getElementById('listaReivindicacoes');
@@ -71,12 +103,12 @@
                 const item = document.createElement('div');
                 item.className = 'list-group-item d-flex justify-content-between align-items-center';
                 item.innerHTML = `
-          <div>
-            <strong>Doação:</strong> ${r.nomeAlimento}<br />
-            <small>Status: ${r.statusDoacao}</small>
-          </div>
-          <button class="btn btn-primary btn-sm">Confirmar Coleta</button>
-        `;
+            <div>
+              <strong>Doação:</strong> ${r.nomeAlimento}<br />
+              <small>Status: ${r.statusDoacao}</small>
+            </div>
+            <button class="btn btn-primary btn-sm">Confirmar Coleta</button>
+          `;
                 item.querySelector('button').addEventListener('click', () => confirmarColeta(r));
                 lista.appendChild(item);
             });
@@ -103,11 +135,10 @@
 
     document.getElementById('formAvaliacao').addEventListener('submit', async e => {
         e.preventDefault();
-
         const nota = document.getElementById('nota').value;
         const comentario = document.getElementById('comentario').value;
         const idOng = document.getElementById('idOng').value;
-        const idDoador = 1; // Ajuste para o id do usuário logado
+        const idDoador = 1;
 
         const res = await fetch('/api/avaliacoes', {
             method: 'POST',
@@ -118,7 +149,7 @@
         const dados = await res.json();
         if(dados.success) {
             alert('Avaliação registrada com sucesso!');
-            document.getElementById('avaliacaoForm').reset();
+            document.getElementById('formAvaliacao').reset();
             document.getElementById('avaliacaoForm').style.display = 'none';
             carregarReivindicacoes();
         } else {
@@ -128,7 +159,6 @@
 
     window.addEventListener('load', carregarReivindicacoes);
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
