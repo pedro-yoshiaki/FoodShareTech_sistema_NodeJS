@@ -7,7 +7,7 @@ export const criarDoacao = (req, res) => {
   const statusDoacao = 'Disponível';
   
   // Calcula o momento exato da expiração (agora + 2 minutos para teste)
-  const dataHoraExpiracao = new Date(dataAtual.getTime() + 30 * 60000); 
+  const dataHoraExpiracao = new Date(dataAtual.getTime() + 2 * 60000); 
 
   // Removemos a coluna horaColeta que era nula
   const sqlDoacao = `

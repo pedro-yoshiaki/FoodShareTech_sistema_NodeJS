@@ -102,7 +102,7 @@ export const verReivindicacoes = (req, res) => {
  * Rota: POST /api/reivindicacoes/:id/confirmar
  */
 export const confirmarColeta = (req, res) => {
-    const { idReivindicacao } = req.params;
+    const { id } = req.params;
     const { idDoacao } = req.body; // Recebe o código de confirmação do corpo da requisição
 
     if (!idDoacao) {
@@ -112,7 +112,7 @@ export const confirmarColeta = (req, res) => {
     // Primeiro, verifica se o idDoacao fornecido corresponde ao da reivindicação
     const sqlVerify = "SELECT fk_doacao_id FROM Reivindicacao WHERE idReivindicacao = ?";
     
-    conexao.query(sqlVerify, [idReivindicacao], (err, results) => {
+    conexao.query(sqlVerify, [id], (err, results) => {
         if (err) return res.status(500).json({ success: false, error: err });
         if (results.length === 0) return res.status(404).json({ success: false, message: "Reivindicação não encontrada." });
 
