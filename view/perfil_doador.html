@@ -18,9 +18,9 @@
         <a class="navbar-brand" href="#">FoodShareTech</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/home_doador">Home</a></li>
-                <li class="nav-item"><a class="nav-link " href="/confirmar_coleta_doador">Confirmar Coleta</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/perfil_doador">Perfil</a></li>
+                <li class="nav-item"><a class="nav-link" href="/home_doador.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link " href="/confirmar_coleta_doador.html">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/perfil_doador.html">Perfil</a></li>
             </ul>
         </div>
     </div>
@@ -73,14 +73,30 @@
 </div>
 
 <script>
-    const idUsuario = 1; // Exemplo fixo – substitua com ID vindo da sessão/login
+    // --- Bloco de Verificação de Autenticação ---
+    const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+    const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
+
+    if (!usuarioLogado || usuarioLogado.tipo !== 'Doador') {
+        alert('Acesso não autorizado. Você precisa estar logado como uma ONG.');
+        window.location.href = '/login.html';
+    }
+    // --- Fim do Bloco de Verificação ---
+
+    // Pega o ID do usuário base, que é o que a API espera
+    const idUsuario = usuarioLogado.id_usuario;
 
     // Função para carregar os dados do perfil
     async function carregarPerfil() {
-        const resposta = await fetch(`/api/usuarios/me?idOng=${idUsuario}`);
+        try{
+        const resposta = await fetch(`/api/usuarios/me?id=${idUsuario}`);
         const dados = await resposta.json();
 
-        if (dados.success) {
+        if (!dados.success) {
+                alert('Erro ao carregar perfil: ' + (dados.message || ''));
+                return;
+            }
+
             document.getElementById('nome').value = dados.usuario.nome;
             document.getElementById('email').value = dados.usuario.email;
             document.getElementById('estado').value = dados.endereco.estado;
@@ -99,6 +115,9 @@
                 input.name = 'contatos';
                 contatosContainer.appendChild(input);
             });
+        } catch (error){
+            alert('Erro ao carregar perfil.');
+            console.error(error);
         }
     }
 
@@ -129,21 +148,25 @@
             },
             contatos: contatos
         };
+        try{
+            const resposta = await fetch(`/api/usuarios/me?id=${idUsuario}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosAtualizados)
+            });
 
-        const resposta = await fetch('/api/usuarios/me', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dadosAtualizados)
-        });
-
-        const resultado = await resposta.json();
-        alert(resultado.message);
+            const resultado = await resposta.json();
+            alert(resultado.message);
+        } catch (error){
+            alert('Erro ao atualizar perfil.');
+            console.error(error);
+        }
     });
 
     // Excluir conta
     document.getElementById('btnExcluirConta').addEventListener('click', async () => {
         if (confirm("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.")) {
-            const resposta = await fetch('/api/usuarios/me', {
+            const resposta = await fetch(`/api/usuarios/me?id=${idUsuario}`, {
                 method: 'DELETE'
             });
             const resultado = await resposta.json();
