@@ -41,6 +41,17 @@
         .navbar-ong .nav-link:hover {
             color: var(--accent) !important;
         }
+        .navbar-ong .dropdown-item:hover {
+        color: #d87f33 !important; /* Sua cor de destaque --accent */
+        
+        }
+
+        /* Remove o fundo azul padrão do Bootstrap quando um item é clicado/ativo */
+        .navbar-ong .dropdown-item:active,
+        .navbar-ong .dropdown-item:focus {
+            background-color: rgba(216, 127, 51, 0.2); /* Um fundo um pouco mais forte para o clique */
+            color: #d87f33 !important;
+        }
         .section-title {
             font-size: 1.75rem;
             font-weight: 600;

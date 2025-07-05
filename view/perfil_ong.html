@@ -40,6 +40,17 @@
         .navbar-ong .nav-link:hover {
             color: var(--accent) !important;
         }
+        .navbar-ong .dropdown-item:hover {
+        color: #d87f33 !important; /* Sua cor de destaque --accent */
+        
+        }
+
+        /* Remove o fundo azul padrão do Bootstrap quando um item é clicado/ativo */
+        .navbar-ong .dropdown-item:active,
+        .navbar-ong .dropdown-item:focus {
+            background-color: rgba(216, 127, 51, 0.2); /* Um fundo um pouco mais forte para o clique */
+            color: #d87f33 !important;
+        }
         .section-title {
             font-size: 1.75rem;
             font-weight: 600;
@@ -88,7 +99,7 @@
                 <li class="nav-item"><a class="nav-link" href="/doacoes_conquistadas_ong.html">Doações Conquistadas</a></li>
                 <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Perfil
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
