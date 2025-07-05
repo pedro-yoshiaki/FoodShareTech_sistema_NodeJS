@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FoodShareTech - Relatório ONG</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> <style>
+  :root {
+    --bg-base: #f7f3ec;
+    --text-base: #4b4636;
+    --accent: #d87f33;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(75, 70, 54, 0.1);
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-base);
+    padding-top: 80px;
+  }
+  .navbar-ong {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid #ddd;
+    padding: 0.75rem 1rem;
+  }
+  .navbar-ong .navbar-brand {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1.75rem;
+  }
+  .navbar-ong .nav-link {
+    color: var(--text-base) !important;
+    font-weight: 500;
+    margin-left: 1rem;
+    transition: color .2s;
+  }
+  .navbar-ong .nav-link.active,
+  .navbar-ong .nav-link:hover {
+    color: var(--accent) !important;
+  }
+  .section-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+  }
+  .section-title::after {
+    content: '';
+    width: 50px;
+    height: 4px;
+    background: var(--accent);
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    border-radius: 2px;
+  }
+  .card-summary {
+    background: var(--card-bg);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--card-shadow);
+    transition: transform .3s;
+  }
+  .card-summary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px var(--card-shadow);
+  }
+  .card-summary .card-body {
+    padding: 1rem 1.25rem;
+  }
+  .card-summary .card-title {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .filter-card, .chart-card, .table-card {
+    background: var(--card-bg);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--card-shadow);
+    margin-bottom: 1.5rem;
+  }
+  .filter-card .card-body, .chart-card .card-body, .table-card .card-body {
+    padding: 1.25rem;
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-ong fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="/home_ong">FoodShareTech</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navOng" aria-label="Alternar navegação">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navOng">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/home_ong">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong">Confirmar Coleta</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/relatorio_ong">Relatório</a></li>
+        <li class="nav-item"><a class="nav-link" href="/perfil_ong">Perfil</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2 class="section-title">Histórico e Análise</h2>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card card-summary">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title">Total</h5>
+            <p id="totalReivindicacoes" class="mb-0 display-6">0</p>
+          </div>
+          <i class="bi bi-list-ol fs-1 text-muted"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card card-summary">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title">Pendentes</h5>
+            <p id="reivindicacoesPendentes" class="mb-0 display-6">0</p>
+          </div>
+          <i class="bi bi-hourglass-split fs-1 text-muted"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card card-summary">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title">Concluídas</h5>
+            <p id="reivindicacoesConcluidas" class="mb-0 display-6">0</p>
+          </div>
+          <i class="bi bi-check-circle fs-1 text-muted"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card filter-card">
+    <div class="card-body">
+      <h5 class="card-title">Filtros de Reivindicações</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="filtroStatus" class="form-label">Status</label>
+          <select id="filtroStatus" class="form-select">
+            <option value="">Todos</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Concluída">Concluída</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="filtroDataInicio" class="form-label">Data Início</label>
+          <input type="date" id="filtroDataInicio" class="form-control" />
+        </div>
+        <div class="col-md-4">
+          <label for="filtroDataFim" class="form-label">Data Fim</label>
+          <input type="date" id="filtroDataFim" class="form-control" />
+        </div>
+        <div class="col-12 text-end mt-2">
+          <button id="aplicarFiltros" class="btn btn-ong me-2">Aplicar</button>
+          <button id="limparFiltros" class="btn btn-secondary">Limpar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card chart-card">
+        <div class="card-body">
+          <h5 class="card-title">Por Status</h5>
+          <canvas id="chartStatus"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card chart-card">
+        <div class="card-body">
+          <h5 class="card-title">Por Prioridade</h5>
+          <canvas id="chartPrioridade"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    <div class="card-body">
+      <h5 class="card-title">Detalhes das Reivindicações</h5>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Prioridade</th>
+            <th>ID Doação</th>
+            <th>Status Doação</th>
+            <th>Alimento</th>
+          </tr>
+          </thead>
+          <tbody id="reivindicacoesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+<script>
+  // Registra o plugin de datalabels para os gráficos
+  Chart.register(ChartDataLabels);
+
+  // Variáveis globais para os dados e gráficos
+  let allReivindicacoes = [];
+  let chartStatus;
+  let chartPrioridade;
+
+  // --- LÓGICA DE AUTENTICAÇÃO E EXECUÇÃO PRINCIPAL ---
+  document.addEventListener('DOMContentLoaded', () => {
+    // --- CÓDIGO REMOVIDO/COMENTADO: VERIFICAÇÃO DE ONG ---
+    /*
+    const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+    const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
+
+    if (!usuarioLogado || usuarioLogado.tipo !== 'ONG') {
+        alert('Acesso não autorizado. Você precisa estar logado como uma ONG.');
+        window.location.href = 'login.html'; // Redireciona para a página de login
+        return;
+    }
+    */
+    // --- FIM DO CÓDIGO REMOVIDO/COMENTADO ---
+
+    // Se você remover a verificação acima, precisará definir um ID de ONG para testes, por exemplo:
+    // const idOngLogada = usuarioLogado ? usuarioLogado.perfilId : 1; // Usar ID 1 se não houver usuário logado (apenas para testes)
+    // Ou, se for simular, pode hardcodar um ID de ONG conhecido para seu ambiente de teste:
+    const idOngLogada = 1; // Substitua '1' pelo ID da ONG que você está usando para teste
+
+    carregarReivindicacoes(idOngLogada);
+
+    // Adiciona os event listeners para os botões de filtro
+    document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
+    document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
+  });
+
+  /**
+   * Atualiza os cartões de resumo com os dados totais, pendentes e concluídos.
+   * @param {Array} reivindicacoes - Lista de reivindicações.
+   */
+  function atualizarCardsResumo(reivindicacoes) {
+    document.getElementById('totalReivindicacoes').textContent = reivindicacoes.length;
+    const pendentes = reivindicacoes.filter(item => item.resultadoFinal.toLowerCase() === 'em disputa' || item.resultadoFinal.toLowerCase() === 'aguardando sua coleta').length;
+    const concluidas = reivindicacoes.filter(item => item.resultadoFinal.toLowerCase().includes('coletado')).length;
+    document.getElementById('reivindicacoesPendentes').textContent = pendentes;
+    document.getElementById('reivindicacoesConcluidas').textContent = concluidas;
+  }
+
+  /**
+   * Renderiza o gráfico de status das reivindicações.
+   * @param {Array} reivindicacoes - Lista de reivindicações.
+   */
+  function renderChartStatus(reivindicacoes) {
+    const statusCounts = {};
+    reivindicacoes.forEach(item => {
+      const status = item.resultadoFinal;
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+    });
+
+    const labels = Object.keys(statusCounts);
+    const data = Object.values(statusCounts);
+
+    const backgroundColors = labels.map(label => {
+      if (label.toLowerCase().includes('coletado')) return 'rgba(75, 192, 192, 0.7)';
+      if (label.toLowerCase().includes('aguardando')) return 'rgba(255, 159, 64, 0.7)';
+      if (label.toLowerCase().includes('em disputa')) return 'rgba(54, 162, 235, 0.7)';
+      if (label.toLowerCase().includes('cancelada')) return 'rgba(255, 99, 132, 0.7)';
+      return 'rgba(201, 203, 207, 0.7)';
+    });
+    const borderColors = backgroundColors.map(color => color.replace('0.7', '1'));
+
+    const ctx = document.getElementById('chartStatus').getContext('2d');
+
+    if (chartStatus) {
+      chartStatus.destroy();
+    }
+
+    chartStatus = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw;
+                const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                return `${label}: ${value} (${percentage})`;
+              }
+            }
+          },
+          datalabels: {
+            color: '#fff',
+            formatter: (value, context) => {
+              const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '';
+              return value > 0 ? percentage : '';
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Renderiza o gráfico de prioridade das reivindicações.
+   * @param {Array} reivindicacoes - Lista de reivindicações.
+   */
+  function renderChartPrioridade(reivindicacoes) {
+    const prioridadeFaixas = {
+      '0-25': 0,
+      '26-50': 0,
+      '51-75': 0,
+      '76-100': 0
+    };
+
+    reivindicacoes.forEach(item => {
+      const prioridade = item.prioridadeCalculada;
+      if (prioridade >= 0 && prioridade <= 25) {
+        prioridadeFaixas['0-25']++;
+      } else if (prioridade > 25 && prioridade <= 50) {
+        prioridadeFaixas['26-50']++;
+      } else if (prioridade > 50 && prioridade <= 75) {
+        prioridadeFaixas['51-75']++;
+      } else if (prioridade > 75 && prioridade <= 100) {
+        prioridadeFaixas['76-100']++;
+      }
+    });
+
+    const labels = Object.keys(prioridadeFaixas);
+    const data = Object.values(prioridadeFaixas);
+
+    const ctx = document.getElementById('chartPrioridade').getContext('2d');
+
+    if (chartPrioridade) {
+      chartPrioridade.destroy();
+    }
+
+    chartPrioridade = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Número de Reivindicações',
+          data: data,
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+            'rgba(255, 99, 132, 0.7)'
+          ],
+          borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 99, 132, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Quantidade de Reivindicações'
+            },
+            ticks: {
+              precision: 0
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Faixa de Prioridade Calculada'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `Reivindicações: ${context.raw}`;
+              }
+            }
+          },
+          datalabels: {
+            color: '#000',
+            anchor: 'end',
+            align: 'top',
+            formatter: (value) => value > 0 ? value : ''
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Popula a tabela com as reivindicações filtradas.
+   * @param {Array} reivindicacoesFiltradas - Lista de reivindicações a serem exibidas.
+   */
+  function popularTabela(reivindicacoesFiltradas) {
+    const tbody = document.getElementById('reivindicacoesBody');
+    tbody.innerHTML = '';
+
+    if (reivindicacoesFiltradas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma reivindicação encontrada.</td></tr>';
+      return;
+    }
+
+    reivindicacoesFiltradas.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+                <td>${item.idReivindicacao}</td>
+                <td>${item.resultadoFinal}</td>
+                <td>${new Date(item.dataReivindicacao).toLocaleString()}</td>
+                <td>${item.prioridadeCalculada.toFixed(2)}</td>
+                <td>${item.idDoacao}</td>
+                <td>${item.statusDoacao}</td>
+                <td>${item.nomeAlimento}</td>
+            `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /**
+   * Carrega as reivindicações da API e as exibe.
+   * Aplica filtros e atualiza os gráficos e a tabela.
+   */
+  async function carregarReivindicacoes(idOng) {
+    try {
+      const resposta = await fetch(`/api/relatorios?tipo=ONG&id=${idOng}`);
+      const dados = await resposta.json();
+
+      if (!dados.success) {
+        console.error('Erro ao carregar relatório:', dados.message || 'Erro desconhecido.');
+        return;
+      }
+
+      allReivindicacoes = dados.relatorio;
+
+      aplicarFiltros();
+      atualizarCardsResumo(allReivindicacoes);
+      renderChartStatus(allReivindicacoes);
+      renderChartPrioridade(allReivindicacoes);
+
+    } catch (error) {
+      console.error('Erro de comunicação ao carregar relatório.', error);
+    }
+  }
+
+  /**
+   * Aplica os filtros selecionados e atualiza a tabela e os gráficos.
+   */
+  function aplicarFiltros() {
+    let reivindicacoesFiltradas = [...allReivindicacoes];
+
+    const filtroStatus = document.getElementById('filtroStatus').value;
+    const filtroDataInicio = document.getElementById('filtroDataInicio').value;
+    const filtroDataFim = document.getElementById('filtroDataFim').value;
+
+    if (filtroStatus) {
+      reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => {
+        if (filtroStatus === 'Pendente') {
+          return item.resultadoFinal === 'Aguardando sua Coleta' || item.resultadoFinal === 'Em disputa';
+        } else if (filtroStatus === 'Concluída') {
+          return item.resultadoFinal.includes('Coletado');
+        }
+        return false;
+      });
+    }
+
+    if (filtroDataInicio) {
+      const dataInicio = new Date(filtroDataInicio + 'T00:00:00');
+      reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => {
+        const dataReivindicacao = new Date(item.dataReivindicacao);
+        return dataReivindicacao >= dataInicio;
+      });
+    }
+
+    if (filtroDataFim) {
+      const dataFim = new Date(filtroDataFim + 'T23:59:59');
+      reivindicacoesFiltradas = reivindicacoesFiltradas.filter(item => {
+        const dataReivindicacao = new Date(item.dataReivindicacao);
+        return dataReivindicacao <= dataFim;
+      });
+    }
+
+    popularTabela(reivindicacoesFiltradas);
+    renderChartStatus(reivindicacoesFiltradas);
+    renderChartPrioridade(reivindicacoesFiltradas);
+  }
+
+  /**
+   * Limpa todos os filtros e recarrega os dados originais.
+   */
+  function limparFiltros() {
+    document.getElementById('filtroStatus').value = '';
+    document.getElementById('filtroDataInicio').value = '';
+    document.getElementById('filtroDataFim').value = '';
+    aplicarFiltros();
+  }
+</script>
+</body>
+</html>
