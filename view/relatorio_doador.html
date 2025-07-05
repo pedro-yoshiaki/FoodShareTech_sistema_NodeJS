@@ -200,21 +200,30 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
 <script>
-    Chart.register(ChartDataLabels);
+    // --- LÓGICA DE AUTENTICAÇÃO E EXECUÇÃO PRINCIPAL ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Registra o plugin de datalabels para os gráficos
+        Chart.register(ChartDataLabels);
 
-    const idDoador = 1; // Substituir por ID real da sessão do doador
-    let allDoacoes = [];
-    let chartStatusDoacao;
-    let chartCategoriaAlimento;
+        // --- Bloco de Verificação de Autenticação ---
+        const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+        const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        await carregarDoacoes(idDoador);
-        await carregarOngsParaAvaliar(idDoador);
+        if (!usuarioLogado || usuarioLogado.tipo !== 'Doador') {
+            alert('Acesso não autorizado. Você precisa estar logado como um Doador.');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // Pega o ID de perfil do Doador logado
+        const idDoadorLogado = usuarioLogado.perfilId;
+        
+        // --- Variáveis Globais ---
+        let allDoacoes = [];
+        let chartStatusDoacao;
+        let chartCategoriaAlimento;
 
-        document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
-        document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
-    });
-
+        // --- Funções ---
     /**
      * Carrega as doações da API e as exibe.
      */
@@ -223,92 +232,66 @@
             const tbody = document.getElementById('doacoesBody');
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Carregando doações...</td></tr>'; // Mensagem de loading
 
-            const resposta = await fetch(`/api/relatorios?tipo=Doador&id=${idDoador}`);
+            const resposta = await fetch(`/api/relatorios?tipo=Doador&id=${idDoadorLogado}`);
             const dados = await resposta.json();
 
             if (!resposta.ok || !dados.success) {
-                console.error('Erro ao carregar relatório de doador:', dados.message || 'Erro desconhecido.');
-                alert('Erro ao carregar suas doações. Tente novamente mais tarde.');
-                allDoacoes = [];
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Erro ao carregar doações.</td></tr>';
-            } else {
+                    throw new Error(dados.message || 'Erro ao carregar doações.');
+                }
                 allDoacoes = dados.relatorio;
-                // Formata as datas para exibição legível
-                allDoacoes.forEach(item => {
-                    item.dataDoacao = new Date(item.dataDoacao).toLocaleDateString();
-                    item.validade = new Date(item.validade).toLocaleDateString();
-                });
-            }
-
-            aplicarFiltros(); // Aplica filtros iniciais e renderiza tudo
-            renderChartStatusDoacao(allDoacoes);
-            renderChartCategoriaAlimento(allDoacoes);
+                aplicarFiltros();
 
         } catch (error) {
             console.error('Erro de comunicação ao carregar relatório de doador.', error);
-            alert('Erro de comunicação ao carregar suas doações. Verifique sua conexão.');
-            allDoacoes = [];
-            document.getElementById('doacoesBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Erro de conexão.</td></tr>';
-            if (chartStatusDoacao) chartStatusDoacao.destroy();
-            if (chartCategoriaAlimento) chartCategoriaAlimento.destroy();
+                document.getElementById('doacoesBody').innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">${error.message}</td></tr>`;
         }
     }
 
-    /**
-     * Carrega ONGs para o doador avaliar.
-     * Esta função é um MOCK. Você precisará de um endpoint real no seu backend.
-     * Idealmente, este endpoint retornaria ONGs que o doador interagiu (ex: doações coletadas por elas)
-     * e que ainda não foram avaliadas por este doador.
-     */
-    async function carregarOngsParaAvaliar(idDoador) {
-        const listaOngsContainer = document.getElementById('listaOngsParaAvaliar');
-        const loadingOngs = document.getElementById('loadingOngs');
-        const noOngs = document.getElementById('noOngs');
+    
+     //Carrega ONGs para o doador avaliar.
+     // Função para carregar a lista de ONGs pendentes de avaliação
+        async function carregarOngsParaAvaliar() {
+            const listaOngsContainer = document.getElementById('listaOngsParaAvaliar');
+            const loadingOngs = document.getElementById('loadingOngs');
+            const noOngs = document.getElementById('noOngs');
 
-        listaOngsContainer.innerHTML = ''; // Limpa antes de carregar
-        loadingOngs.style.display = 'block';
-        noOngs.style.display = 'none';
+            try {
+                // SUBSTITUIÇÃO DO MOCK: Faz a chamada fetch para o novo endpoint
+                const response = await fetch(`/api/doador/${idDoadorLogado}/ongs-para-avaliar`);
+                const data = await response.json();
+                
+                if (!response.ok || !data.success) throw new Error(data.message || 'Erro ao carregar ONGs.');
 
-        try {
-            // MOCK de dados. Em um cenário real, você faria um fetch:
-            // const response = await fetch(`/api/ongsParaAvaliar?idDoador=${idDoador}`);
-            // const data = await response.json();
-            // const ongs = data.ongs; // Assumindo que a resposta virá com um array 'ongs'
+                const ongs = data.ongs;
 
-            // Dados mockados para demonstração:
-            const ongs = [
-                { id: 3, nome: "ONG Solidária Alfa" },
-                { id: 7, nome: "ONG Esperança Viva" },
-                { id: 10, nome: "ONG Alimentando Futuros" }
-            ];
+                loadingOngs.style.display = 'none';
+                listaOngsContainer.innerHTML = ''; 
 
-            loadingOngs.style.display = 'none';
-
-            if (ongs && ongs.length > 0) {
-                ongs.forEach(ong => {
-                    const listItem = document.createElement('a');
-                    listItem.href = `/avaliar_ong?idOng=${ong.id}&nomeOng=${encodeURIComponent(ong.nome)}`;
-                    listItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
-                    listItem.innerHTML = `
-                        <div>
-                            <h6 class="mb-0">${ong.nome}</h6>
-                            <small class="text-muted">ID: ${ong.id}</small>
-                        </div>
-                        <button class="btn btn-outline-primary btn-sm">Avaliar <i class="bi bi-star"></i></button>
-                    `;
-                    listaOngsContainer.appendChild(listItem);
-                });
-            } else {
+                if (ongs && ongs.length > 0) {
+                    ongs.forEach(ong => {
+                        const listItem = document.createElement('a');
+                        // Corrigido para apontar para uma futura página de avaliação
+                        listItem.href = `avaliar_ong.html?idOng=${ong.idOng}&nomeOng=${encodeURIComponent(ong.nomeOng)}`;
+                        listItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        listItem.innerHTML = `
+                            <div>
+                                <h6 class="mb-0">${ong.nomeOng}</h6>
+                                <small class="text-muted">ID: ${ong.idOng}</small>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm">Avaliar <i class="bi bi-star"></i></button>
+                        `;
+                        listaOngsContainer.appendChild(listItem);
+                    });
+                } else {
+                    noOngs.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar ONGs para avaliar:', error);
+                loadingOngs.style.display = 'none';
+                noOngs.textContent = 'Erro ao carregar ONGs.';
                 noOngs.style.display = 'block';
             }
-        } catch (error) {
-            console.error('Erro ao carregar ONGs para avaliar:', error);
-            loadingOngs.style.display = 'none';
-            noOngs.textContent = 'Erro ao carregar ONGs.';
-            noOngs.style.display = 'block';
         }
-    }
-
 
     /**
      * Renderiza o gráfico de status das doações.
@@ -497,10 +480,10 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${item.idDoacao}</td>
-                <td>${item.dataDoacao}</td>
+                <td>${new Date(item.dataDoacao).toLocaleDateString('pt-BR')}</td>
                 <td>${item.quantidadeDoacao}</td>
                 <td><span class="badge ${getStatusBadgeClass(item.statusDoacao)}">${item.statusDoacao}</span></td>
-                <td>${item.validade}</td>
+                <td>${new Date(item.validade).toLocaleDateString('pt-BR')}</td>
                 <td>${item.nomeAlimento}</td>
                 <td>${item.categoria}</td>
             `;
@@ -570,6 +553,13 @@
         document.getElementById('filtroDataFim').value = '';
         aplicarFiltros();
     }
+
+        document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
+        document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
+        
+        carregarDoacoes();
+        carregarOngsParaAvaliar();
+    });
 </script>
 </body>
 </html>
