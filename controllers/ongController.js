@@ -161,20 +161,49 @@ export const listarColetasPendentes = (req, res) => {
     // Consulta que busca as doações que estão 'Aguardando Coleta' E
     // onde a reivindicação vencedora pertence à ONG logada.
     const sql = `
-        SELECT 
-            d.idDoacao,
-            d.dataColeta, -- O prazo final para a coleta
-            d.horaColeta, -- A hora final para a coleta
-            a.nomeAlimento,
-            u.nome AS nomeDoador,
-            r.idReivindicacao -- O ID da reivindicação para usar no botão de confirmação
-        FROM Doacao d
+                SELECT 
+                d.idDoacao,
+                d.quantidadeDoacao,
+                d.validade,
+                d.statusDoacao,
+                d.dataColeta AS prazoDataColeta,
+                d.horaColeta AS prazoHoraColeta,
+                a.nomeAlimento,
+                a.categoria,
+                a.unidadeMedida,
+                u_doador.nome AS nomeDoador,
+                CONCAT(e_doador.logradouro, ', ', e_doador.numero, ' - ', e_doador.bairro, ', ', e_doador.cidade, '/', e_doador.estado) AS enderecoColeta,
+                GROUP_CONCAT(c_doador.telefone SEPARATOR ', ') AS doadorTelefone,
+                r.idReivindicacao
+            FROM Doacao d
             JOIN Reivindicacao r ON d.fk_reivindicacao_id = r.idReivindicacao
             JOIN Alimento a ON d.idDoacao = a.fk_doacao_id
             JOIN Doador doador ON d.fk_doador_id = doador.idDoador
-            JOIN Usuario u ON doador.fk_usuario_id = u.id_usuario
-        WHERE d.statusDoacao = 'Aguardando Coleta' AND r.fk_ong_id = ?
-            ORDER BY d.dataColeta ASC;
+            JOIN Usuario u_doador ON doador.fk_usuario_id = u_doador.id_usuario
+            LEFT JOIN Endereco e_doador ON u_doador.id_usuario = e_doador.fk_usuario_id
+            LEFT JOIN Contato c_doador ON u_doador.id_usuario = c_doador.fk_usuario_id
+            WHERE
+                d.statusDoacao = 'Aguardando Coleta' 
+                AND r.fk_ong_id = 1
+            GROUP BY
+                d.idDoacao,
+                d.quantidadeDoacao,
+                d.validade,
+                d.statusDoacao,
+                d.dataColeta,
+                d.horaColeta,
+                a.nomeAlimento,
+                a.categoria,
+                a.unidadeMedida,
+                u_doador.nome,
+                e_doador.logradouro,
+                e_doador.numero,
+                e_doador.bairro,
+                e_doador.cidade,
+                e_doador.estado,
+                r.idReivindicacao
+            ORDER BY 
+                d.dataColeta ASC;
         `;
 
     conexao.query(sql, [idOng], (erro, resultados) => {

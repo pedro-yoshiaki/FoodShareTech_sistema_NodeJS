@@ -115,29 +115,25 @@ if (!usuarioLogado || usuarioLogado.tipo !== 'ONG') {
     window.location.href = 'login.html';
     return;
 }
-// --- Fim do Bloco de Verificação ---
 
 const idOngLogada = usuarioLogado.perfilId;
 const logoutButton = document.getElementById('logoutButton');
 
 if (logoutButton) {
     logoutButton.addEventListener('click', (event) => {
-        // Impede que o link '#' recarregue a página
         event.preventDefault();
-
-        // 1. Limpa a variável do usuário logado do navegador
         localStorage.removeItem('usuarioLogado');
-
-        // 2. Avisa o usuário e o redireciona para a nova página home.html
         alert('Você saiu com sucesso');
         window.location.href = 'home.html';
     });
 }
 
+// --- Funções da Página ---
+
 // Função para carregar as coletas pendentes
 async function carregarColetas() {
     try {
-        // CHAMA O ENDPOINT CORRETO E DEDICADO PARA ESTA TELA
+        // Chama o endpoint correto e dedicado para esta tela
         const resposta = await fetch(`/api/ong/coletas-pendentes?idOng=${idOngLogada}`);
         const dados = await resposta.json();
 
@@ -146,26 +142,38 @@ async function carregarColetas() {
         const container = document.getElementById('coletas-container');
         container.innerHTML = '';
 
-        // Os dados agora vêm da propriedade 'coletas' e já estão filtrados pelo backend
         const coletasPendentes = dados.coletas;
 
         if (coletasPendentes.length === 0) {
-            container.innerHTML = '<div class="col-12"><p class="text-muted">Nenhuma coleta pendente encontrada.</p></div>';
+            container.innerHTML = '<div class="col-12"><p class="text-center text-muted">Nenhuma coleta pendente encontrada.</p></div>';
             return;
         }
 
         coletasPendentes.forEach(coleta => {
             const card = document.createElement('div');
-            card.className = 'col-md-6';
+            card.className = 'col-lg-6'; // Ajuste de layout para melhor espaçamento
             card.innerHTML = `
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">${coleta.nomeAlimento}</h5>
                         <p class="card-text mb-1"><strong>Doador:</strong> ${coleta.nomeDoador}</p>
-                        <p class="card-text text-danger">
-                            <strong>Coletar até:</strong> ${new Date(coleta.dataColeta).toLocaleDateString()} às ${coleta.horaColeta}
+                        <p class="card-text mb-1">
+                            <strong>Contato:</strong> ${coleta.doadorTelefone || 'Não informado'}
                         </p>
-                        <button class="btn btn-ong w-100" onclick="confirmarColeta(${coleta.idReivindicacao})">
+                        <p class="card-text mb-1">
+                            <strong>Endereço de Coleta:</strong><br>
+                            ${coleta.enderecoColeta}
+                        </p>
+                        <hr>
+                        <p class="card-text mb-1">
+                            <strong>Quantidade:</strong> ${coleta.quantidadeDoacao} ${coleta.unidadeMedida} | 
+                            <strong>Validade:</strong> ${new Date(coleta.validade).toLocaleDateString('pt-BR')}
+                        </p>
+                        <hr>
+                        <p class="card-text text-danger">
+                            <strong>Coletar até:</strong> ${new Date(coleta.prazoDataColeta).toLocaleDateString('pt-BR')} às ${coleta.prazoHoraColeta}
+                        </p>
+                        <button class="btn btn-ong w-100 mt-2" onclick="confirmarColeta(${coleta.idReivindicacao})">
                             Confirmar Coleta Realizada
                         </button>
                     </div>
@@ -182,7 +190,7 @@ async function carregarColetas() {
     }
 }
 
-// Função para confirmar a coleta, agora ligada ao objeto 'window'
+// Função para confirmar a coleta, agora ligada ao objeto 'window' para ser acessível
 window.confirmarColeta = async function(idReivindicacao) {
     if (!confirm("Você confirma que realizou a coleta desta doação?")) return;
 
