@@ -87,7 +87,16 @@
                 <li class="nav-item"><a class="nav-link" href="/cadastro_Beneficiario_Ong.html">Beneficiários</a></li>
                 <li class="nav-item"><a class="nav-link" href="/doacoes_conquistadas_ong.html">Doações Conquistadas</a></li>
                 <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/perfil_ong.html">Perfil</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Perfil
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="perfil_ong.html">Ver Perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="logoutButton">Sair</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>
@@ -164,6 +173,21 @@
 
     // Pega o ID do usuário base, que é o que a API espera
     const idUsuarioLogado = usuarioLogado.id_usuario;
+    const logoutButton = document.getElementById('logoutButton');
+
+if (logoutButton) {
+    logoutButton.addEventListener('click', (event) => {
+        // Impede que o link '#' recarregue a página
+        event.preventDefault();
+
+        // 1. Limpa a variável do usuário logado do navegador
+        localStorage.removeItem('usuarioLogado');
+
+        // 2. Avisa o usuário e o redireciona para a nova página home.html
+        alert('Você saiu com sucesso');
+        window.location.href = 'home.html';
+    });
+}
 
     // Carrega os dados do perfil ONG
     async function carregarPerfil() {
