@@ -132,4 +132,49 @@ export const listarDoacoesDisponiveis = (req, res) => {
       return res.status(200).json(resultados);
   });
 };
+
+/**
+ * Exclui uma doação, desde que ela pertença ao doador e tenha o status 'Cancelada'.
+ * Rota: DELETE /api/doacoes/:id
+ */
+export const excluirDoacao = (req, res) => {
+  const { id } = req.params; // ID da Doação a ser excluída
+  const { idDoador } = req.body; // ID do Doador que está fazendo a requisição
+
+  if (!idDoador) {
+      return res.status(403).json({ success: false, message: 'Acesso não autorizado.' });
+  }
+
+  conexao.beginTransaction(err => {
+      if (err) return res.status(500).json({ error: err });
+
+      // Passo 1: Verificar se a doação pertence ao doador e se o status é 'Cancelada'
+      const sqlVerify = "SELECT * FROM Doacao WHERE idDoacao = ? AND fk_doador_id = ? AND statusDoacao = 'Cancelada'";
+      conexao.query(sqlVerify, [id, idDoador], (errVerify, results) => {
+          if (errVerify) return conexao.rollback(() => res.status(500).json({ error: errVerify }));
+
+          if (results.length === 0) {
+              return conexao.rollback(() => res.status(403).json({ success: false, message: 'Ação não permitida: a doação não pertence a você ou não está cancelada.' }));
+          }
+
+          // Passo 2: Deletar os registros da tabela Alimento associados
+          const sqlDeleteAlimento = "DELETE FROM Alimento WHERE fk_doacao_id = ?";
+          conexao.query(sqlDeleteAlimento, [id], (errAlimento) => {
+              if (errAlimento) return conexao.rollback(() => res.status(500).json({ error: errAlimento }));
+
+              // Passo 3: Deletar o registro da tabela Doacao
+              const sqlDeleteDoacao = "DELETE FROM Doacao WHERE idDoacao = ?";
+              conexao.query(sqlDeleteDoacao, [id], (errDoacao) => {
+                  if (errDoacao) return conexao.rollback(() => res.status(500).json({ error: errDoacao }));
+
+                  // Se tudo deu certo, efetiva as exclusões
+                  conexao.commit(errCommit => {
+                      if (errCommit) return conexao.rollback(() => res.status(500).json({ error: errCommit }));
+                      res.status(200).json({ success: true, message: 'Doação excluída com sucesso.' });
+                  });
+              });
+          });
+      });
+  });
+};
   
