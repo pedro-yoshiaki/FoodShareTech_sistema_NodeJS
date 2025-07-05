@@ -27,7 +27,8 @@ import doacaoRoutes from './routes/doacaoRoutes.js';
 import ongRoutes from './routes/ongRoutes.js';
 import avaliacaoRoutes from './routes/avaliacaoRoutes.js';
 import relatorioRoutes from './routes/relatorioRoutes.js';
-import beneficiarioRoutes from './routes/beneficiarioRoutes.js'; 
+import beneficiarioRoutes from './routes/beneficiarioRoutes.js';
+import doadorRoutes from './routes/doadorRoutes.js';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -52,5 +53,6 @@ app.use('/api', ongRoutes);
 app.use('/api', avaliacaoRoutes);
 app.use('/api', relatorioRoutes);
 app.use('/api', beneficiarioRoutes);
+app.use('/api', doadorRoutes);
 
 app.listen(PORT, () => console.log(`O servidor está rodando na porta ${PORT}, abra seu navegador e digite na url -> localhost:${PORT}`));
