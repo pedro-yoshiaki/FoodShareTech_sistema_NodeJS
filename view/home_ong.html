@@ -125,7 +125,7 @@
         <div class="collapse navbar-collapse" id="navOng">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link active" href="/home_ong.html">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong.html">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong.html">Doações Conquistadas</a></li>
                 <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
                 <li class="nav-item"><a class="nav-link" href="/perfil_ong.html">Perfil</a></li>
             </ul>
@@ -215,7 +215,7 @@ async function carregarDoacoes() {
                             <p class="card-text">
                                 <i class="fas fa-box me-2"></i> Qtd: ${doacao.quantidadeDoacao}<br>
                                 <i class="fas fa-calendar-times me-2"></i> Validade: ${new Date(doacao.validade).toLocaleDateString()}<br>
-                                <i class="fas fa-hourglass-half me-2"></i> Lances até: ${doacao.tempoReivindicacao}
+                                <i class="fas fa-hourglass-half me-2"></i> Lances até: ${new Date(doacao.tempoReivindicacao).toLocaleString('pt-BR')}
                             </p>
                             
                             <div class="mt-auto">

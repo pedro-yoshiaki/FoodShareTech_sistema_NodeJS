@@ -1,36 +1,29 @@
 import conexao from '../db/conexao.js';
 
 export const criarDoacao = (req, res) => {
-  const {
-    id_doador, // ID do doador que está fazendo a doação
-    quantidadeDoacao,
-    validade,
-    alimento
-  } = req.body;
+  const { id_doador, quantidadeDoacao, validade, alimento } = req.body;
 
   const dataAtual = new Date();
-  const dataDoacao = dataAtual.toISOString().split('T')[0];
   const statusDoacao = 'Disponível';
-  const dataReivindicacaoLimite = new Date(dataAtual.getTime() + 30 * 60000);
-  const tempoReivindicacao = dataReivindicacaoLimite.toTimeString().split(' ')[0];
-  const horaColeta = null;
+  
+  // Calcula o momento exato da expiração (agora + 2 minutos para teste)
+  const dataHoraExpiracao = new Date(dataAtual.getTime() + 2 * 60000); 
 
-  // 1. O INSERT na Doacao agora inclui o fk_doador_id
+  // Removemos a coluna horaColeta que era nula
   const sqlDoacao = `
-    INSERT INTO Doacao (dataDoacao, quantidadeDoacao, validade, statusDoacao, tempoReivindicacao, horaColeta, fk_doador_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO Doacao (dataDoacao, quantidadeDoacao, validade, statusDoacao, fk_doador_id, tempoReivindicacao)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
+  // Passamos o objeto dataHoraExpiracao diretamente para a coluna tempoReivindicacao
   conexao.query(
     sqlDoacao,
-    // Adicionamos o id_doador aos parâmetros do INSERT
-    [dataDoacao, quantidadeDoacao, validade, statusDoacao, tempoReivindicacao, horaColeta, id_doador],
+    [dataAtual, quantidadeDoacao, validade, statusDoacao, id_doador, dataHoraExpiracao],
     (err1, result1) => {
       if (err1) return res.status(500).json({ error: err1 });
 
       const idDoacao = result1.insertId;
 
-      // 2. O INSERT em Alimento continua o mesmo
       const sqlAlimento = `
         INSERT INTO Alimento (nomeAlimento, categoria, unidadeMedida, prioridade, fk_doacao_id)
         VALUES (?, ?, ?, ?, ?)
@@ -41,9 +34,6 @@ export const criarDoacao = (req, res) => {
         [alimento.nomeAlimento, alimento.categoria, alimento.unidadeMedida, alimento.prioridade, idDoacao],
         (err2) => {
           if (err2) return res.status(500).json({ error: err2 });
-
-          // 3. O passo de UPDATE no Doador foi REMOVIDO.
-          // A lógica termina aqui, retornando sucesso.
           return res.status(201).json({
             success: true,
             message: 'Doação cadastrada com sucesso!',
