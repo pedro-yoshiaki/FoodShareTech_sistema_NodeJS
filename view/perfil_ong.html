@@ -4,79 +4,150 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FoodShareTech - Perfil ONG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
-        body { padding-top: 56px; }
-        nav .nav-link.active { font-weight: bold; }
+        :root {
+            --bg-base: #f7f3ec;
+            --text-base: #4b4636;
+            --accent: #d87f33;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(75, 70, 54, 0.1);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-base);
+            padding-top: 80px;
+        }
+        .navbar-ong {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid #ddd;
+            padding: 0.75rem 1rem;
+        }
+        .navbar-ong .navbar-brand {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.75rem;
+        }
+        .navbar-ong .nav-link {
+            color: var(--text-base) !important;
+            font-weight: 500;
+            margin-left: 1rem;
+            transition: color .2s;
+        }
+        .navbar-ong .nav-link.active,
+        .navbar-ong .nav-link:hover {
+            color: var(--accent) !important;
+        }
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: '';
+            width: 50px;
+            height: 4px;
+            background: var(--accent);
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            border-radius: 2px;
+        }
+        .form-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .btn-ong {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+        }
+        .btn-ong:hover {
+            background-color: #c96f2b;
+        }
     </style>
 </head>
 <body>
-
-<!-- Navbar topo -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+<nav class="navbar navbar-expand-lg navbar-ong fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="#">Sistema de Doações</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <a class="navbar-brand" href="/home_ong.html">FoodShareTech</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navOng">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse" id="navOng">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/home_ong.html">Home ONG</a></li>
-                <li class="nav-item"><a class="nav-link" href="/confirmar_entrega_ong.html">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link" href="/home_ong.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/doacoes_conquistadas_ong.html">Confirmar Coleta</a></li>
                 <li class="nav-item"><a class="nav-link" href="/relatorio_ong.html">Relatório</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/perfil_ong.html">Perfil ONG</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/perfil_ong.html">Perfil</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
-
 <div class="container mt-4">
-    <h2>Meu Perfil - ONG</h2>
+    <h2 class="section-title">Meu Perfil - ONG</h2>
 
-    <form id="formPerfil">
-        <div class="mb-3">
-            <label for="nome" class="form-label">Nome</label>
-            <input type="text" id="nome" class="form-control" required />
-        </div>
+    <div class="form-section">
+        <form id="formPerfil">
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" id="nome" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" class="form-control" required />
+            </div>
+            <h4 class="mt-4">Endereço</h4>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <input type="text" id="estado" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="cidade" class="form-label">Cidade</label>
+                <input type="text" id="cidade" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="bairro" class="form-label">Bairro</label>
+                <input type="text" id="bairro" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="logradouro" class="form-label">Logradouro</label>
+                <input type="text" id="logradouro" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="numero" class="form-label">Número</label>
+                <input type="text" id="numero" class="form-control" required />
+            </div>
+            <h4 class="mt-4">Contatos</h4>
+            <div id="contatosContainer" class="mb-3"></div>
+            <button type="button" class="btn btn-secondary mb-3" id="btnAddContato">Adicionar Contato</button>
+            <button type="submit" class="btn btn-ong">Salvar Alterações</button>
+        </form>
+    </div>
 
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" id="email" class="form-control" required />
-        </div>
+    <div class="form-section text-center">
+        <button class="btn btn-danger" id="btnExcluirConta">Excluir Conta</button>
+    </div>
+</div>
 
-        <h4>Endereço</h4>
-        <div class="mb-3">
-            <label for="estado" class="form-label">Estado</label>
-            <input type="text" id="estado" class="form-control" required />
+<!-- POPUP CONFIRMAÇÃO -->
+<div id="popupConfirmacao" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.6); z-index: 1050; align-items: center; justify-content: center;">
+    <div style="background-color: white; border-radius: 12px; padding: 2rem; max-width: 500px; box-shadow: 0 0 20px rgba(0,0,0,0.3); text-align: center;">
+        <h4 style="color: #c0392b; margin-bottom: 1rem;">Tem certeza que deseja excluir sua conta?</h4>
+        <p style="color: #555;">Ao excluir sua conta, todos os dados serão permanentemente removidos. Você não poderá acessar novamente sem um novo cadastro e validações administrativas adicionais serão exigidas.</p>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <button id="confirmarExclusao" class="btn btn-danger">Sim, excluir</button>
+            <button id="cancelarExclusao" class="btn btn-secondary">Cancelar</button>
         </div>
-        <div class="mb-3">
-            <label for="cidade" class="form-label">Cidade</label>
-            <input type="text" id="cidade" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label for="bairro" class="form-label">Bairro</label>
-            <input type="text" id="bairro" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label for="logradouro" class="form-label">Logradouro</label>
-            <input type="text" id="logradouro" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label for="numero" class="form-label">Número</label>
-            <input type="text" id="numero" class="form-control" required />
-        </div>
-
-        <h4>Contatos</h4>
-        <div id="contatosContainer" class="mb-3"></div>
-        <button type="button" class="btn btn-secondary mb-3" id="btnAddContato">Adicionar Contato</button>
-
-        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-    </form>
-
-    <hr />
-
-    <button class="btn btn-danger mt-3" id="btnExcluirConta">Excluir Conta</button>
+    </div>
 </div>
 
 <script>
@@ -202,7 +273,6 @@
     // Carrega o perfil assim que a página é iniciada
     carregarPerfil();
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
