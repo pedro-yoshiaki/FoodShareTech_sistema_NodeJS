@@ -141,7 +141,7 @@
 
                 // SALVA OS DADOS DO USUÁRIO NO NAVEGADOR
                 localStorage.setItem('usuarioLogado', JSON.stringify(dados.usuario));
-                 // Aguarda 1.5 segundos antes de redirecionar
+                 // Aguarda 0.7 segundos antes de redirecionar
                 setTimeout(() => {
                     // --- LÓGICA DE REDIRECIONAMENTO AQUI ---
                     // Verifica o tipo de usuário retornado pelo backend
@@ -154,10 +154,10 @@
                     } else {
                         // Um fallback (caso seguro), caso o tipo não seja reconhecido
                         console.error('Tipo de usuário desconhecido:', dados.usuario.tipo);
-                        window.location.href = '/'; // Redireciona para uma página padrão
+                        window.location.href = '/home.html'; // Redireciona para uma página padrão
                     }
                     // --- FIM DA LÓGICA ---
-                }, 1500);
+                }, 700);
 
             } else {
                 // Login falhou, exibe a mensagem de erro do backend

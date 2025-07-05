@@ -21,6 +21,17 @@
     .navbar-brand { font-weight: 700; font-size: 1.5rem; }
     .nav-link { font-weight: 500; transition: color .3s; }
     .nav-link:hover, .nav-link.active { color: #ffc107 !important; }
+    /* Altera a cor do texto e do fundo quando o mouse passa por cima */
+    .navbar .dropdown-item:hover {
+            color: #ffc107 !important; /* Mantém o texto escuro para contraste */
+        }
+
+        /* Remove o fundo azul padrão do Bootstrap quando um item é clicado/ativo */
+        .navbar .dropdown-item:active,
+        .navbar .dropdown-item:focus {
+            background-color: rgba(255, 193, 7, 0.3); /* Fundo amarelo um pouco mais forte para o clique */
+            color: #ffc107 !important;
+        }
 
     .offcanvas { width: 250px; }
 
@@ -45,7 +56,16 @@
         <li class="nav-item"><a class="nav-link" href="/home_doador.html">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="/relatorio_doador.html">Relatório</a></li>
         <li class="nav-item"><a class="nav-link" href="/confirmar_coleta_doador.html">Confirmar Coleta</a></li>
-        <li class="nav-item"><a class="nav-link active" href="/perfil_doador.html">Perfil</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Perfil
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="perfil_doador.html">Ver Perfil</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="logoutButton">Sair</a></li>
+          </ul>
+      </li>
       </ul>
     </div>
   </div>
@@ -131,7 +151,21 @@
 
     // Pega o ID do usuário base, que é o que a API espera
     const idUsuario = usuarioLogado.id_usuario;
+    const logoutButton = document.getElementById('logoutButton');
 
+if (logoutButton) {
+    logoutButton.addEventListener('click', (event) => {
+        // Impede que o link '#' recarregue a página
+        event.preventDefault();
+
+        // 1. Limpa a variável do usuário logado do navegador
+        localStorage.removeItem('usuarioLogado');
+
+        // 2. Avisa o usuário e o redireciona para a nova página home.html
+        alert('Você saiu com sucesso');
+        window.location.href = 'home.html';
+    });
+}
     // Função para carregar os dados do perfil
     async function carregarPerfil() {
         try{
