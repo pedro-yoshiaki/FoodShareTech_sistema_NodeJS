@@ -171,7 +171,7 @@ export const listarColetasPendentes = (req, res) => {
             LEFT JOIN Contato c_doador ON u_doador.id_usuario = c_doador.fk_usuario_id
             WHERE
                 d.statusDoacao = 'Aguardando Coleta' 
-                AND r.fk_ong_id = 1
+                AND r.fk_ong_id = ?
             GROUP BY
                 d.idDoacao,
                 d.quantidadeDoacao,
