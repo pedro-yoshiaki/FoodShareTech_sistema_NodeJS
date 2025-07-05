@@ -102,46 +102,33 @@ export const verReivindicacoes = (req, res) => {
  * Rota: POST /api/reivindicacoes/:id/confirmar
  */
 export const confirmarColeta = (req, res) => {
-    const { id } = req.params; // ID da Reivindicação vencedora
+    const { idReivindicacao } = req.params;
+    const { idDoacao } = req.body; // Recebe o código de confirmação do corpo da requisição
 
-    const sqlBuscaDoacao = 'SELECT fk_doacao_id, statusDoacao FROM Doacao INNER JOIN Reivindicacao ON Doacao.idDoacao = Reivindicacao.fk_doacao_id WHERE Reivindicacao.idReivindicacao = ?';
+    if (!idDoacao) {
+        return res.status(400).json({ success: false, message: "O código da doação é obrigatório para confirmar." });
+    }
 
-    conexao.query(sqlBuscaDoacao, [id], (erroBusca, resultadoBusca) => {
-        if (erroBusca) return res.status(500).json({ success: false, error: erroBusca });
-        if (resultadoBusca.length === 0) return res.status(404).json({ success: false, message: "Reivindicação ou doação associada não encontrada." });
+    // Primeiro, verifica se o idDoacao fornecido corresponde ao da reivindicação
+    const sqlVerify = "SELECT fk_doacao_id FROM Reivindicacao WHERE idReivindicacao = ?";
+    
+    conexao.query(sqlVerify, [idReivindicacao], (err, results) => {
+        if (err) return res.status(500).json({ success: false, error: err });
+        if (results.length === 0) return res.status(404).json({ success: false, message: "Reivindicação não encontrada." });
 
-        const idDoacao = resultadoBusca[0].fk_doacao_id;
-        const statusAtual = resultadoBusca[0].statusDoacao;
+        const doacaoCorretaId = results[0].fk_doacao_id;
 
-        // 1. VERIFICAÇÃO: Garante que a coleta só pode ser confirmada se o status for 'Aguardando Coleta'
-        if (statusAtual !== 'Aguardando Coleta') {
-            return res.status(400).json({ success: false, message: `Ação não permitida. O status da doação é '${statusAtual}', não 'Aguardando Coleta'.` });
+        // Valida se o código informado pela ONG é o correto
+        if (doacaoCorretaId !== idDoacao) {
+            return res.status(400).json({ success: false, message: "Código da doação incorreto. Verifique com o doador." });
         }
 
-        // 2. ATUALIZAÇÃO FINAL: Muda o status para 'Coletada' e o status da coleta para 'Confirmada'.
-        // Também atualiza a data e hora para o momento exato da confirmação.
-        const sqlUpdateFinal = `
-            UPDATE Doacao 
-            SET 
-                statusDoacao = 'Coletada',
-                statusColeta = 'Confirmada',
-                dataColeta = CURDATE(), 
-                horaColeta = CURTIME()
-            WHERE idDoacao = ?
-        `;
-
-        conexao.query(sqlUpdateFinal, [idDoacao], (erroUpdate, resultadoUpdate) => {
-            if (erroUpdate) return res.status(500).json({ success: false, error: erroUpdate });
-
-            if (resultadoUpdate.affectedRows === 0) {
-                return res.status(404).json({ success: false, message: "Doação não encontrada para confirmação." });
-            }
-
-            // 3. (Opcional, mas recomendado) Atualiza o status da reivindicação para 'Concluída'
-            const sqlUpdateReivindicacao = "UPDATE Reivindicacao SET statusReivindicacao = 'Concluída' WHERE idReivindicacao = ?";
-            conexao.query(sqlUpdateReivindicacao, [id]);
-
-            return res.status(200).json({ success: true, message: "Coleta da doação confirmada com sucesso!" });
+        // Se o código estiver correto, atualiza o status da doação para 'Coletada'
+        const sqlUpdate = "UPDATE Doacao SET statusDoacao = 'Coletada' WHERE idDoacao = ?";
+        conexao.query(sqlUpdate, [doacaoCorretaId], (errUpdate) => {
+            if (errUpdate) return res.status(500).json({ success: false, error: errUpdate });
+            
+            res.status(200).json({ success: true, message: "Coleta confirmada com sucesso!" });
         });
     });
 };

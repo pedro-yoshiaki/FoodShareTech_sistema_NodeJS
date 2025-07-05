@@ -192,23 +192,43 @@ async function carregarColetas() {
 
 // Função para confirmar a coleta, agora ligada ao objeto 'window' para ser acessível
 window.confirmarColeta = async function(idReivindicacao) {
-    if (!confirm("Você confirma que realizou a coleta desta doação?")) return;
+    // Pede à ONG para inserir o código de confirmação
+    const codigoConfirmacao = prompt("Para confirmar, por favor, insira o Código da Doação fornecido pelo doador:");
+
+    // Se o usuário cancelar o prompt, a função para
+    if (codigoConfirmacao === null) {
+        return; 
+    }
+    
+    // Valida se algo foi digitado
+    if (!codigoConfirmacao.trim()) {
+        alert("O código da doação é obrigatório.");
+        return;
+    }
 
     try {
         const resposta = await fetch(`/api/reivindicacoes/${idReivindicacao}/confirmar`, {
-            method: "POST"
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // Envia o código digitado no corpo da requisição
+            body: JSON.stringify({ idDoacao: parseInt(codigoConfirmacao) })
         });
+        
         const resultado = await resposta.json();
 
         if (resultado.success) {
             alert(resultado.message);
-            carregarColetas(); // Recarrega a lista para remover o item confirmado
+            // Recarrega a lista para que a doação confirmada suma da tela de pendências
+            carregarDoacoesConquistadas(); 
         } else {
+            // Mostra a mensagem de erro vinda do backend (ex: "Código incorreto")
             alert("Erro: " + (resultado.message || "Não foi possível confirmar."));
         }
     } catch (erro) {
         console.error(erro);
-        alert("Erro ao confirmar a coleta.");
+        alert("Erro de comunicação ao confirmar a coleta.");
     }
 }
 
