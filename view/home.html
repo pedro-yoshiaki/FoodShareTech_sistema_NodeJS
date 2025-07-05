@@ -3,196 +3,548 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadastro - FoodShareTech</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <title>FoodShareTech - Doe e Transforme Vidas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        :root {
+            /* Cores para a seção ONG (Dourado e Laranja) */
+            --ong-golden-bg: #f7f3ec; /* Fundo suave, tom dourado claro */
+            --ong-accent: #d87f33; /* Laranja terroso para destaque */
+            --ong-dark-accent: #c06c2a; /* Laranja mais escuro */
+            --ong-text: #4b4636; /* Texto marrom escuro */
+
+            /* Cores para a seção Doador (Azulado e Branco) */
+            --doador-blue-bg: #e0f2f7; /* Azul bem claro/esbranquiçado */
+            --doador-accent: #3182ce; /* Azul vibrante */
+            --doador-dark-accent: #2c5282; /* Azul mais escuro */
+            --doador-text: #2d3748; /* Texto cinza azulado escuro */
+
+            /* Cores para as páginas pré-login (Verde Pastel) */
+            --home-green-bg: #d8f3dc; /* VERDE PASTEL */
+            --home-green-dark: #2d6a4f; /* Verde escuro */
+            --home-green-text: #1b4332; /* Tom mais escuro para títulos em verde */
+
+            /* Cores Neutras */
+            --white: #ffffff;
+            --light-grey: #e9ecef;
+        }
+
         body {
-            background: linear-gradient(to right, #6ab04c, #badc58);
-            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--home-green-bg); /* Fundo padrão da página VERDE PASTEL */
+            color: var(--ong-text); /* Cor de texto padrão, pode ser ajustada por seção */
+            padding-top: 70px; /* Espaço para o navbar fixo */
             display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            animation: fadeIn 0.5s ease-in-out; /* Animação de fade-in no carregamento */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .navbar {
+            background-color: var(--white); /* Navbar branco */
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--ong-accent); /* Marca em laranja/dourado */
+            font-size: 1.6rem;
+        }
+
+        .nav-link {
+            color: var(--ong-text); /* Links em marrom escuro */
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--ong-accent); /* Hover em laranja/dourado */
+        }
+
+        /* Hero Section - Split Layout */
+        .hero-section {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+
+        .hero-panel {
+            flex: 1;
+            padding: 80px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: background-color 0.4s ease-in-out;
+            position: relative;
+        }
+
+        /* ESTILOS PARA DOADOR: AZULADO E BRANCO */
+        .hero-panel.doador {
+            background-color: var(--doador-blue-bg); /* Fundo azulado claro */
+            color: var(--doador-text); /* Texto azulado escuro */
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .hero-panel.doador h2 {
+            color: var(--doador-dark-accent); /* Título azul escuro */
+        }
+
+        .btn-hero.doador {
+            background-color: var(--doador-accent); /* Botão azul vibrante */
+            color: var(--white);
+            border: none;
+        }
+        .btn-hero.doador:hover {
+            background-color: var(--doador-dark-accent);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        .hero-panel.doador .icon-background {
+            color: var(--doador-accent); /* Ícone azul vibrante */
+        }
+
+
+        /* ESTILOS PARA ONG: DOURADO E LARANJA */
+        .hero-panel.ong {
+            background-color: var(--ong-golden-bg); /* Fundo dourado claro */
+            color: var(--ong-text); /* Texto marrom escuro */
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .hero-panel.ong h2 {
+            color: var(--ong-dark-accent); /* Título laranja escuro */
+        }
+
+        .btn-hero.ong {
+            background-color: var(--ong-accent); /* Botão laranja terroso */
+            color: var(--white);
+            border: none;
+        }
+        .btn-hero.ong:hover {
+            background-color: var(--ong-dark-accent);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        .hero-panel.ong .icon-background {
+            color: var(--ong-accent); /* Ícone laranja terroso */
+        }
+
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .hero-panel h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            z-index: 1;
+            animation: scaleUp 0.7s ease-out;
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.9); opacity: 0.8; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .hero-panel p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            max-width: 500px;
+            z-index: 1;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Icone de fundo para os paineis do Hero */
+        .hero-panel .icon-background {
+            position: absolute;
+            font-size: 12rem;
+            opacity: 0.08;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+            transition: font-size 0.3s ease, opacity 0.3s ease;
+        }
+
+        .btn-hero {
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1;
+            animation: fadeInUp 0.9s ease-out;
         }
 
-        .card {
-            width: 100%;
-            max-width: 850px;
-            border: none;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .form-image {
-            background: url('imagens/Copilot_20250702_172714.png') no-repeat center center;
-            background-size: cover;
-            height: 100%;
+        /* Stats Section */
+        .stats-section {
+            background-color: var(--home-green-bg); /* VERDE PASTEL */
+            padding: 60px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            animation: fadeIn 1s ease-out;
         }
 
-        .form-section {
-            padding: 2rem;
-            background: #fff;
+        .stats-section h2 {
+            color: var(--home-green-text); /* Título em verde escuro */
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
         }
 
-        .form-section h2 {
-            color: #218c74;
-            font-weight: bold;
+        .stat-item {
+            padding: 25px;
+            background: var(--white); /* Itens brancos */
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            color: var(--home-green-dark); /* Texto em verde escuro */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 1.1s ease-out;
         }
-
-        .input-box label {
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+        .stat-item h3 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .stat-item p {
+            font-size: 1.15rem;
             font-weight: 500;
-            margin-bottom: 0.3rem;
         }
 
-        .input-box input, .input-box select {
-            border-radius: 10px;
+        /* How It Works Section */
+        .how-it-works-section {
+            background-color: var(--doador-blue-bg); /* Fundo azulado claro (para manter o contraste com o verde pastel) */
+            padding: 80px 20px;
+            text-align: center;
+            animation: fadeIn 1.2s ease-out;
         }
 
-        .btn-success {
-            background-color: #27ae60;
+        .how-it-works-section h2 {
+            color: var(--doador-dark-accent); /* Título em azul escuro */
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+        }
+
+        .step-item {
+            background-color: var(--white); /* Fundo branco */
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 1.3s ease-out;
+        }
+        .step-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .step-item .icon {
+            font-size: 3.5rem;
+            color: var(--doador-accent); /* Ícone em azul vibrante */
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .step-item h3 {
+            font-size: 1.8rem;
+            color: var(--doador-text); /* Título em azul escuro */
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .step-item p {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Call to Action Section */
+        .cta-section {
+            background-color: var(--ong-accent); /* Fundo laranja terroso (ONG) */
+            color: var(--white);
+            padding: 60px 20px;
+            text-align: center;
+            animation: fadeIn 1.4s ease-out;
+        }
+
+        .cta-section h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--white);
+            animation: scaleUp 1.5s ease-out;
+        }
+
+        .cta-section p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            animation: fadeIn 1.6s ease-out;
+        }
+
+        .cta-buttons .btn {
+            background-color: var(--white);
+            color: var(--ong-accent); /* Botão em laranja terroso */
             border: none;
-            transition: background-color 0.3s ease;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+            animation: pulseButton 1.8s infinite alternate;
         }
 
-        .btn-success:hover {
-            background-color: #219150;
+        @keyframes pulseButton {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+
+        .cta-buttons .btn:hover {
+            background-color: var(--ong-dark-accent);
+            color: var(--white);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        footer {
+            background: var(--home-green-dark); /* Rodapé verde escuro */
+            color: #eee;
+            padding: 25px 40px;
+            text-align: center;
+            font-size: 0.95rem;
+            margin-top: auto;
+            animation: fadeIn 2s ease-out;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .hero-panel {
+                flex: 1 1 100%;
+                padding: 60px 20px;
+            }
+            .hero-panel.doador {
+                border-bottom: 5px solid rgba(0,0,0,0.05);
+            }
+            .hero-panel .icon-background {
+                font-size: 8rem;
+            }
+            .how-it-works-section h2 {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-panel h2 {
+                font-size: 2.2rem;
+            }
+            .hero-panel p {
+                font-size: 1rem;
+            }
+            .btn-hero {
+                font-size: 1rem;
+                padding: 12px 25px;
+            }
+            .stats-section h2, .cta-section h2 {
+                font-size: 2rem;
+            }
+            .stat-item h3 {
+                font-size: 2rem;
+            }
+            .stat-item p {
+                font-size: 1rem;
+            }
+            .how-it-works-section h2 {
+                font-size: 1.8rem;
+            }
+            .step-item h3 {
+                font-size: 1.5rem;
+            }
+            .step-item p {
+                font-size: 0.9rem;
+            }
+            .cta-section p {
+                font-size: 1rem;
+            }
+            .cta-buttons .btn {
+                font-size: 1rem;
+                padding: 12px 30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.4rem;
+            }
+            .hero-panel {
+                padding: 40px 20px;
+            }
+            .hero-panel h2 {
+                font-size: 1.8rem;
+            }
+            .hero-panel p {
+                font-size: 0.9rem;
+            }
+            .btn-hero {
+                width: 90%;
+            }
+            .hero-panel .icon-background {
+                font-size: 6rem;
+            }
         }
     </style>
 </head>
 <body>
-<div class="card d-flex flex-md-row flex-column">
-    <!-- Imagem lateral -->
-    <div class="form-image col-md-5 d-none d-md-block"></div>
-
-    <!-- Formulário -->
-    <div class="form-section col-md-7">
-        <h2 class="mb-4">Cadastre-se</h2>
-        <form id="formCadastro">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="nome" class="form-label">Nome</label>
-                    <input type="text" id="nome" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="senha" class="form-label">Senha</label>
-                    <input type="password" id="senha" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="tipo" class="form-label">Tipo</label>
-                    <select id="tipo" class="form-select" required>
-                        <option value="">Selecione...</option>
-                        <option value="ONG">ONG</option>
-                        <option value="Doador">Doador</option>
-                    </select>
-                </div>
-                <div class="col-md-12">
-                    <label for="cnpjCpf" class="form-label">CNPJ/CPF</label>
-                    <input type="text" id="cnpjCpf" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="estado" class="form-label">Estado</label>
-                    <input type="text" id="estado" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="cidade" class="form-label">Cidade</label>
-                    <input type="text" id="cidade" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="bairro" class="form-label">Bairro</label>
-                    <input type="text" id="bairro" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="logradouro" class="form-label">Logradouro</label>
-                    <input type="text" id="logradouro" class="form-control" required>
-                </div>
-                <div class="col-md-4">
-                    <label for="numero" class="form-label">Número</label>
-                    <input type="number" id="numero" class="form-control" required>
-                </div>
-                <div class="col-md-8">
-                    <label for="contato" class="form-label">Contatos</label>
-                    <div id="telefonesContainer">
-                        <input type="text" name="contatos" class="form-control mb-2" placeholder="Contato 1" required>
-                    </div>
-                    <button type="button" class="btn btn-outline-success btn-sm" onclick="adicionarContato()">+ Adicionar outro</button>
-                </div>
-            </div>
-            <div class="text-end mt-4">
-                <button type="submit" class="btn btn-success px-4">Cadastrar</button>
-            </div>
-            <div id="retornoServidor" class="alert mt-3 d-none"></div>
-        </form>
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">FoodShareTech</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="sobre_nos.html">Sobre</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how-it-works">Como Funciona</a></li>
+                <li class="nav-item"><a class="nav-link" href="cadastro.html">Cadastro</a></li>
+                <li class="nav-item"><a class="nav-link" href="login.html">Entrar</a></li>
+            </ul>
+        </div>
     </div>
-</div>
+</nav>
 
-<script>
-    function adicionarContato() {
-        const container = document.getElementById('telefonesContainer');
-        const novoInput = document.createElement('input');
-        novoInput.type = 'text';
-        novoInput.name = 'contatos';
-        novoInput.className = 'form-control mb-2';
-        novoInput.placeholder = 'Outro contato';
-        novoInput.required = true;
-        container.appendChild(novoInput);
-    }
+<main>
+    <section class="hero-section">
+        <div class="hero-panel doador">
+            <i class="fas fa-hand-holding-heart icon-background"></i> <h2>Sou um Doador</h2>
+            <p>Empresas, produtores ou indivíduos: se você tem **alimentos em ótimo estado** que seriam desperdiçados, nós conectamos você a quem precisa com facilidade e segurança.</p>
+            <a href="cadastro.html?type=doador" class="btn-hero doador">Quero Doar Alimentos</a>
+        </div>
+        <div class="hero-panel ong">
+            <i class="fas fa-hands-helping icon-background"></i> <h2>Sou uma ONG</h2>
+            <p>Organizações não governamentais: receba **doações de alimentos frescos e de qualidade** para as comunidades que você atende, otimizando sua logística.</p>
+            <a href="cadastro.html?type=ong" class="btn-hero ong">Quero Receber Doações</a>
+        </div>
+    </section>
 
-    document.getElementById('formCadastro').addEventListener('submit', async function (e) {
-        e.preventDefault();
+    ---
 
-        const divRetorno = document.getElementById('retornoServidor');
-        divRetorno.className = 'alert d-none';
+    <section class="stats-section">
+        <div class="container">
+            <h2>Nosso Impacto em Números</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col">
+                    <div class="stat-item">
+                        <h3>500+</h3>
+                        <p>ONGs Cadastradas</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="stat-item">
+                        <h3>12.000+</h3>
+                        <p>Doações Realizadas</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="stat-item">
+                        <h3>1.200.000 kg</h3>
+                        <p>Alimentos Redistribuídos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        const data = {
-            nome: nome.value,
-            email: email.value,
-            senha: senha.value,
-            tipo: tipo.value,
-            cnpjCpf: cnpjCpf.value,
-            endereco: {
-                estado: estado.value,
-                cidade: cidade.value,
-                bairro: bairro.value,
-                logradouro: logradouro.value,
-                numero: parseInt(numero.value)
-            },
-            contatos: []
-        };
+    ---
 
-        document.querySelectorAll('#telefonesContainer input').forEach(input => {
-            if (input.value.trim()) data.contatos.push(input.value.trim());
-        });
+    <section id="how-it-works" class="how-it-works-section">
+        <div class="container">
+            <h2>Como a FoodShareTech Funciona</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col">
+                    <div class="step-item">
+                        <div class="icon"><i class="fas fa-user-plus"></i></div>
+                        <h3>1. Cadastro Simples</h3>
+                        <p>Doadores e ONGs se registram em nossa plataforma de forma rápida e segura. É o primeiro passo para fazer a diferença.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="step-item">
+                        <div class="icon"><i class="fas fa-hand-holding-usd"></i></div>
+                        <h3>2. Oferta/Solicitação</h3>
+                        <p>Doadores anunciam os alimentos disponíveis, e ONGs fazem lances, sendo um algoritmo, baseado no banco de dados a ONG certa é escolhida.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="step-item">
+                        <div class="icon"><i class="fas fa-truck-moving"></i></div>
+                        <h3>3. Conexão e Entrega</h3>
+                        <p>Nosso sistema inteligente otimiza a conexão, garantindo que as haja uma profunda conexão entre ambos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        try {
-            const resposta = await fetch('/api/cadastro', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+    ---
 
-            const resultado = await resposta.json();
+    <section class="cta-section">
+        <h2>Pronto para Transformar Vidas?</h2>
+        <p>Junte-se à nossa rede de solidariedade e faça parte da solução contra o desperdício alimentar e a fome no Brasil. Sua ação faz a diferença!</p>
+        <div class="cta-buttons">
+            <a href="cadastro.html" class="btn">Cadastre-se Já!</a>
+        </div>
+    </section>
+</main>
 
-            divRetorno.className = 'alert mt-3 ' + (resultado.success ? 'alert-success' : 'alert-danger');
-            divRetorno.textContent = resultado.message || 'Erro no cadastro';
-            divRetorno.classList.remove('d-none');
+<footer>
+    © 2025 FoodShareTech - Todos os direitos reservados.
+</footer>
 
-            if (resultado.success) {
-                formCadastro.reset();
-                setTimeout(() => window.location.href = 'login.html', 1500);
-            }
-
-        } catch (error) {
-            divRetorno.className = 'alert alert-danger mt-3';
-            divRetorno.textContent = 'Erro na requisição.';
-            divRetorno.classList.remove('d-none');
-            console.error(error);
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
