@@ -164,65 +164,58 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const idDoador = 1; // Substituir por ID real da sessão do doador
-
+    // --- LÓGICA DE AUTENTICAÇÃO E EXECUÇÃO PRINCIPAL ---
     document.addEventListener('DOMContentLoaded', () => {
+        // --- Bloco de Verificação de Autenticação ---
+        const usuarioLogadoString = localStorage.getItem('usuarioLogado');
+        const usuarioLogado = usuarioLogadoString ? JSON.parse(usuarioLogadoString) : null;
+
+        if (!usuarioLogado || usuarioLogado.tipo !== 'Doador') {
+            alert('Acesso não autorizado. Você precisa estar logado como um Doador para avaliar.');
+            window.location.href = 'login.html';
+            return; // Interrompe a execução se o usuário não for válido
+        }
+
+        // --- Variáveis e Elementos do Formulário ---
+        const idDoadorLogado = usuarioLogado.perfilId;
         const formAvaliacao = document.getElementById('formAvaliacao');
         const idOngInput = document.getElementById('idOng');
         const nomeOngInput = document.getElementById('nomeOng');
         const notaInvalidFeedback = formAvaliacao.querySelector('.invalid-feedback.d-block');
 
-        // Preenche campos se houver parâmetros na URL (navegação da lista de ONGs)
+        // --- Lógica para Preencher Campos a partir da URL ---
+        // Isso permite que o usuário clique em "Avaliar" na página de relatório e já venha para cá com os dados preenchidos.
         const urlParams = new URLSearchParams(window.location.search);
         const urlIdOng = urlParams.get('idOng');
         const urlNomeOng = urlParams.get('nomeOng');
 
         if (urlIdOng) {
             idOngInput.value = urlIdOng;
-            idOngInput.setAttribute('readonly', 'true'); // Torna o campo somente leitura
-            idOngInput.classList.add('bg-light'); // Adiciona estilo para indicar que é readonly
+            idOngInput.setAttribute('readonly', 'true');
+            idOngInput.classList.add('bg-light');
         }
         if (urlNomeOng) {
             nomeOngInput.value = decodeURIComponent(urlNomeOng);
         }
 
+        // --- Lógica de Submissão do Formulário ---
         formAvaliacao.addEventListener('submit', async (event) => {
             event.preventDefault();
             event.stopPropagation();
 
-            let isValid = true;
-
-            // Validação do ID da ONG
-            if (!idOngInput.value) {
-                idOngInput.classList.add('is-invalid');
-                isValid = false;
-            } else {
-                idOngInput.classList.remove('is-invalid');
-            }
-
-            // Validação da Nota (estrelas)
+            // Validação dos campos do formulário
             const notaSelecionada = formAvaliacao.querySelector('input[name="nota"]:checked');
-            if (!notaSelecionada) {
-                notaInvalidFeedback.style.display = 'block'; // Mostra feedback para as estrelas
-                isValid = false;
-            } else {
-                notaInvalidFeedback.style.display = 'none';
-            }
-
-            if (!isValid) {
-                formAvaliacao.classList.add('was-validated'); // Aplica classe para exibir outros feedbacks do Bootstrap
+            if (!idOngInput.value || !notaSelecionada) {
+                alert('Por favor, preencha o ID da ONG e selecione uma nota.');
                 return;
             }
 
-            const idOng = parseInt(idOngInput.value);
-            const nota = parseInt(notaSelecionada.value);
-            const comentario = document.getElementById('comentario').value;
-
+            // Monta o objeto com os dados para enviar à API
             const avaliacaoData = {
-                idDoador: idDoador,
-                idOng: idOng,
-                nota: nota,
-                comentario: comentario
+                idDoador: idDoadorLogado,
+                idOng: parseInt(idOngInput.value),
+                nota: parseInt(notaSelecionada.value),
+                comentario: document.getElementById('comentario').value
             };
 
             await registrarAvaliacao(avaliacaoData);
@@ -237,32 +230,18 @@
         try {
             const resposta = await fetch('/api/avaliacoes', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(avaliacaoData)
             });
 
             const dados = await resposta.json();
 
-            if (resposta.ok && dados.success) {
-                alert('Avaliação registrada com sucesso! ID da Avaliação: ' + dados.idAvaliacao);
-                document.getElementById('formAvaliacao').reset(); // Limpa o formulário
-                document.getElementById('formAvaliacao').classList.remove('was-validated'); // Remove validação
-
-                // Se o ID da ONG foi preenchido via URL, mantém ele
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('idOng')) {
-                    document.getElementById('idOng').value = urlParams.get('idOng');
-                    document.getElementById('nomeOng').value = decodeURIComponent(urlParams.get('nomeOng'));
-                }
-
-                // Esconde a mensagem de validação das estrelas
-                document.querySelector('.invalid-feedback.d-block').style.display = 'none';
-
+            if (dados.success) {
+                alert('Avaliação registrada com sucesso!');
+                // Redireciona o usuário de volta para o relatório após a avaliação
+                window.location.href = 'relatorio_doador.html'; 
             } else {
                 alert(`Erro ao registrar avaliação: ${dados.message || 'Erro desconhecido.'}`);
-                console.error('Erro ao registrar avaliação:', dados.message);
             }
         } catch (error) {
             console.error('Erro de comunicação ao registrar avaliação.', error);

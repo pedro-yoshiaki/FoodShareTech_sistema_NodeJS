@@ -96,7 +96,7 @@
                 <li class="nav-item"><a class="nav-link" href="/home_doador.html">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="/relatorio_doador.html">Relatório</a></li>
                 <li class="nav-item"><a class="nav-link" href="/avaliacaoONG_doador.html">Avaliar ONG</a></li> 
-                <li class="nav-item"><a class="nav-link" href="/perfil_doador">Perfil</a></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil_doador.html">Perfil</a></li>
             </ul>
         </div>
     </div>
@@ -271,7 +271,7 @@
                     ongs.forEach(ong => {
                         const listItem = document.createElement('a');
                         // Corrigido para apontar para uma futura página de avaliação
-                        listItem.href = `avaliar_ong.html?idOng=${ong.idOng}&nomeOng=${encodeURIComponent(ong.nomeOng)}`;
+                        listItem.href = `avaliacaoONG_doador.html?idOng=${ong.idOng}&nomeOng=${encodeURIComponent(ong.nomeOng)}`;
                         listItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
                         listItem.innerHTML = `
                             <div>
