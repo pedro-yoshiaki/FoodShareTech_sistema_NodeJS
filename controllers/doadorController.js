@@ -38,3 +38,46 @@ export const listarOngsParaAvaliar = (req, res) => {
         return res.status(200).json({ success: true, ongs: resultados });
     });
 };
+
+/**
+ * Lista as doações de um doador que estão aguardando coleta pela ONG vencedora.
+ * Rota: GET /api/doador/:id/aguardando-coleta
+ */
+export const listarDoacoesAguardandoColeta = (req, res) => {
+    const { id } = req.params; // ID do Doador
+
+    // --- CONSULTA CORRIGIDA ---
+    const sql = `
+        SELECT 
+            d.idDoacao,
+            d.statusDoacao,
+            d.dataColeta AS prazoDataColeta,
+            d.horaColeta AS prazoHoraColeta,
+            a.nomeAlimento,
+            o.nomeOng,
+            o.idOng,
+            u_ong.email AS ongEmail,
+            -- Agrupa todos os telefones encontrados em uma única string separada por vírgula
+            GROUP_CONCAT(c.telefone SEPARATOR ', ') AS ongTelefone
+        FROM Doacao d
+        JOIN Reivindicacao r ON d.fk_reivindicacao_id = r.idReivindicacao
+        JOIN ONG o ON r.fk_ong_id = o.idOng
+        JOIN Alimento a ON d.idDoacao = a.fk_doacao_id
+        JOIN Usuario u_ong ON o.fk_usuario_id = u_ong.id_usuario
+        LEFT JOIN Contato c ON u_ong.id_usuario = c.fk_usuario_id
+        WHERE
+            d.fk_doador_id = ?
+            AND d.statusDoacao = 'Aguardando Coleta'
+        -- Agrupa por todas as colunas não agregadas para compatibilidade
+        GROUP BY d.idDoacao, a.nomeAlimento, o.nomeOng, o.idOng, u_ong.email
+        ORDER BY d.dataColeta ASC;
+    `;
+
+    conexao.query(sql, [id], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar doações aguardando coleta:", erro);
+            return res.status(500).json({ success: false, error: erro });
+        }
+        return res.status(200).json({ success: true, doacoes: resultados });
+    });
+};

@@ -69,31 +69,36 @@ export const detalharDoacao = (req, res) => {
 
   const sql = `
     SELECT
-        -- Colunas da tabela Doacao
-        d.idDoacao, d.dataDoacao, d.quantidadeDoacao, d.validade, d.statusDoacao,
-        d.tempoReivindicacao, d.dataColeta, d.horaColeta, d.statusColeta,
-        
-        -- Colunas da tabela Alimento
-        a.nomeAlimento, a.categoria, a.unidadeMedida, a.prioridade,
-        
-        -- Nome do Doador vindo da tabela Usuario
-        u.nome AS nomeDoador,
+          d.idDoacao, d.dataDoacao, d.quantidadeDoacao, d.validade, d.statusDoacao,
+          d.tempoReivindicacao, d.dataColeta, d.horaColeta, d.statusColeta,
+          
+          a.nomeAlimento, a.categoria, a.unidadeMedida, a.prioridade,
+          
+          u.nome AS nomeDoador,
+          
+          -- COLUNAS DO ENDEREÇO
+          e.logradouro, e.numero, e.bairro, e.cidade, e.estado,
 
-        -- COLUNAS DO ENDEREÇO
-        e.logradouro, e.numero, e.bairro, e.cidade, e.estado
-    FROM
-        Doacao d
-    LEFT JOIN
-        Alimento a ON a.fk_doacao_id = d.idDoacao
-    LEFT JOIN 
-        Doador doador ON d.fk_doador_id = doador.idDoador
-    LEFT JOIN 
-        Usuario u ON doador.fk_usuario_id = u.id_usuario
-    LEFT JOIN -- ADICIONADO: junta com a tabela Endereco para pegar o endereço do doador
-        Endereco e ON u.id_usuario = e.fk_usuario_id
-    WHERE
-        d.idDoacao = ?
-  `;
+          -- NOME DA ONG VENCEDORA (A NOVIDADE)
+          ong.nomeOng AS nomeOng
+      FROM
+          Doacao d
+      LEFT JOIN
+          Alimento a ON a.fk_doacao_id = d.idDoacao
+      LEFT JOIN 
+          Doador doador ON d.fk_doador_id = doador.idDoador
+      LEFT JOIN 
+          Usuario u ON doador.fk_usuario_id = u.id_usuario
+      LEFT JOIN 
+          Endereco e ON u.id_usuario = e.fk_usuario_id
+      -- ADICIONADO: junta com Reivindicacao e ONG para encontrar o nome da ONG vencedora
+      LEFT JOIN 
+          Reivindicacao r ON d.fk_reivindicacao_id = r.idReivindicacao
+      LEFT JOIN
+          ONG ong ON r.fk_ong_id = ong.idOng
+      WHERE
+          d.idDoacao = ?
+    `;
 
   conexao.query(sql, [idDoacao], (err, result) => {
     if (err) return res.status(500).json({ error: err });
