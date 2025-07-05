@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FoodShareTech - Avaliar ONG</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Base Styles - Copiado e ajustado do seu exemplo */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            padding-top: 70px;
+            color: #343a40;
+        }
+
+        /* Navbar */
+        .navbar {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        .nav-link {
+            font-weight: 500;
+            transition: color .3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #ffc107 !important; /* Cor de destaque para hover/active */
+        }
+
+        /* Generic Card Style - Usado para o formulário */
+        .card-page {
+            border: none;
+            border-radius: .75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem; /* Espaçamento entre os cards */
+        }
+        .card-page .card-title {
+            font-weight: 600;
+            color: #007bff; /* Cor do título principal do card */
+            margin-bottom: 1rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: #007bff;
+            border: none;
+            border-radius: .5rem;
+            padding: .5rem 1.5rem;
+            font-weight: 600;
+            transition: background .3s;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .section-heading {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilos para as estrelas de avaliação */
+        .rating {
+            display: inline-block;
+            direction: rtl; /* Para as estrelas aparecerem da direita para a esquerda */
+        }
+        .rating input {
+            display: none;
+        }
+        .rating label {
+            float: right;
+            cursor: pointer;
+            color: #ccc;
+            font-size: 2.5rem; /* Estrelas um pouco maiores */
+            transition: color .2s;
+        }
+        .rating input:checked ~ label,
+        .rating label:hover,
+        .rating label:hover ~ label {
+            color: #ffc107; /* Cor das estrelas selecionadas/hover (amarelo do seu exemplo) */
+        }
+        .rating input:checked + label:hover,
+        .rating input:checked ~ label:hover,
+        .rating input:checked ~ label:hover ~ label,
+        .rating label:hover ~ input:checked ~ label {
+            color: #ffc107;
+        }
+    </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+    <div class="container">
+        <a class="navbar-brand text-primary" href="/home_doador">FoodShareTech</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/home_doador">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/relatorio_doador">Relatório</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/avaliar_ong">Avaliar ONG</a></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil_doador">Perfil</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2 class="section-heading">Avaliar ONG Parceira</h2>
+
+    <div class="card card-page col-lg-8 mx-auto"> <div class="card-body">
+        <h5 class="card-title">Envie sua Avaliação</h5>
+        <form id="formAvaliacao" novalidate>
+            <div class="mb-3">
+                <label for="idOng" class="form-label">ID da ONG</label>
+                <input type="number" class="form-control" id="idOng" placeholder="Ex: 3" required>
+                <div class="form-text">
+                    Selecione a ONG que você deseja avaliar.
+                </div>
+                <div class="invalid-feedback">
+                    Por favor, insira o ID da ONG.
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="nomeOng" class="form-label">Nome da ONG</label>
+                <input type="text" class="form-control" id="nomeOng" placeholder="Nome da ONG" readonly>
+                <div class="form-text">
+                    Este campo é preenchido automaticamente ao selecionar o ID da ONG ou via link.
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Sua Nota</label>
+                <div class="rating">
+                    <input type="radio" id="star5" name="nota" value="5" required /><label for="star5" title="5 estrelas">&#9733;</label>
+                    <input type="radio" id="star4" name="nota" value="4" /><label for="star4" title="4 estrelas">&#9733;</label>
+                    <input type="radio" id="star3" name="nota" value="3" /><label for="star3" title="3 estrelas">&#9733;</label>
+                    <input type="radio" id="star2" name="nota" value="2" /><label for="star2" title="2 estrelas">&#9733;</label>
+                    <input type="radio" id="star1" name="nota" value="1" /><label for="star1" title="1 estrela">&#9733;</label>
+                </div>
+                <div class="invalid-feedback d-block">
+                    Por favor, selecione uma nota.
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="comentario" class="form-label">Comentário (Opcional)</label>
+                <textarea class="form-control" id="comentario" rows="4" placeholder="Deixe um comentário sobre sua experiência com a ONG..."></textarea>
+            </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
+            </div>
+        </form>
+    </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const idDoador = 1; // Substituir por ID real da sessão do doador
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const formAvaliacao = document.getElementById('formAvaliacao');
+        const idOngInput = document.getElementById('idOng');
+        const nomeOngInput = document.getElementById('nomeOng');
+        const notaInvalidFeedback = formAvaliacao.querySelector('.invalid-feedback.d-block');
+
+        // Preenche campos se houver parâmetros na URL (navegação da lista de ONGs)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlIdOng = urlParams.get('idOng');
+        const urlNomeOng = urlParams.get('nomeOng');
+
+        if (urlIdOng) {
+            idOngInput.value = urlIdOng;
+            idOngInput.setAttribute('readonly', 'true'); // Torna o campo somente leitura
+            idOngInput.classList.add('bg-light'); // Adiciona estilo para indicar que é readonly
+        }
+        if (urlNomeOng) {
+            nomeOngInput.value = decodeURIComponent(urlNomeOng);
+        }
+
+        formAvaliacao.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            let isValid = true;
+
+            // Validação do ID da ONG
+            if (!idOngInput.value) {
+                idOngInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                idOngInput.classList.remove('is-invalid');
+            }
+
+            // Validação da Nota (estrelas)
+            const notaSelecionada = formAvaliacao.querySelector('input[name="nota"]:checked');
+            if (!notaSelecionada) {
+                notaInvalidFeedback.style.display = 'block'; // Mostra feedback para as estrelas
+                isValid = false;
+            } else {
+                notaInvalidFeedback.style.display = 'none';
+            }
+
+            if (!isValid) {
+                formAvaliacao.classList.add('was-validated'); // Aplica classe para exibir outros feedbacks do Bootstrap
+                return;
+            }
+
+            const idOng = parseInt(idOngInput.value);
+            const nota = parseInt(notaSelecionada.value);
+            const comentario = document.getElementById('comentario').value;
+
+            const avaliacaoData = {
+                idDoador: idDoador,
+                idOng: idOng,
+                nota: nota,
+                comentario: comentario
+            };
+
+            await registrarAvaliacao(avaliacaoData);
+        });
+    });
+
+    /**
+     * Registra uma nova avaliação de ONG via API.
+     * @param {object} avaliacaoData - Dados da avaliação a ser registrada.
+     */
+    async function registrarAvaliacao(avaliacaoData) {
+        try {
+            const resposta = await fetch('/api/avaliacoes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(avaliacaoData)
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok && dados.success) {
+                alert('Avaliação registrada com sucesso! ID da Avaliação: ' + dados.idAvaliacao);
+                document.getElementById('formAvaliacao').reset(); // Limpa o formulário
+                document.getElementById('formAvaliacao').classList.remove('was-validated'); // Remove validação
+
+                // Se o ID da ONG foi preenchido via URL, mantém ele
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('idOng')) {
+                    document.getElementById('idOng').value = urlParams.get('idOng');
+                    document.getElementById('nomeOng').value = decodeURIComponent(urlParams.get('nomeOng'));
+                }
+
+                // Esconde a mensagem de validação das estrelas
+                document.querySelector('.invalid-feedback.d-block').style.display = 'none';
+
+            } else {
+                alert(`Erro ao registrar avaliação: ${dados.message || 'Erro desconhecido.'}`);
+                console.error('Erro ao registrar avaliação:', dados.message);
+            }
+        } catch (error) {
+            console.error('Erro de comunicação ao registrar avaliação.', error);
+            alert('Erro de comunicação ao registrar avaliação. Verifique a conexão.');
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FoodShareTech - Gerenciar Beneficiários</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-base: #f7f3ec;
+            --text-base: #4b4636;
+            --accent: #d87f33;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(75, 70, 54, 0.1);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-base);
+            padding-top: 80px;
+        }
+        .navbar-ong {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid #ddd;
+            padding: 0.75rem 1rem;
+        }
+        .navbar-ong .navbar-brand {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.75rem;
+        }
+        .navbar-ong .nav-link {
+            color: var(--text-base) !important;
+            font-weight: 500;
+            margin-left: 1rem;
+            transition: color .2s;
+        }
+        .navbar-ong .nav-link.active,
+        .navbar-ong .nav-link:hover {
+            color: var(--accent) !important;
+        }
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: '';
+            width: 50px;
+            height: 4px;
+            background: var(--accent);
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            border-radius: 2px;
+        }
+        .card-summary {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            transition: transform .3s;
+        }
+        .card-summary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--card-shadow);
+        }
+        .card-summary .card-body {
+            padding: 1rem 1.25rem;
+        }
+        .card-summary .card-title {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .filter-card, .chart-card, .table-card, .form-card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            margin-bottom: 1.5rem;
+        }
+        .filter-card .card-body, .chart-card .card-body, .table-card .card-body, .form-card .card-body {
+            padding: 1.25rem;
+        }
+        .btn-ong {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-ong:hover {
+            background-color: #c0702d; /* Slightly darker accent */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-ong fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/home_ong">FoodShareTech</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navOng" aria-label="Alternar navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navOng">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/home_ong">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/confirma_entrega_ong">Confirmar Coleta</a></li>
+                <li class="nav-item"><a class="nav-link" href="/relatorio_ong">Relatório</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/beneficiarios_ong">Beneficiários</a></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil_ong">Perfil</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2 class="section-title">Gerenciar Beneficiários</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card card-summary">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Total de Beneficiários</h5>
+                        <p id="totalBeneficiarios" class="mb-0 display-6">0</p>
+                    </div>
+                    <i class="bi bi-people fs-1 text-muted"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-summary">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Com Dependentes</h5>
+                        <p id="beneficiariosComDependentes" class="mb-0 display-6">0</p>
+                    </div>
+                    <i class="bi bi-person-plus fs-1 text-muted"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card form-card">
+        <div class="card-body">
+            <h5 class="card-title">Registrar Novo Beneficiário</h5>
+            <form id="formBeneficiario">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="cpfBeneficiario" class="form-label">CPF do Beneficiário</label>
+                        <input type="text" class="form-control" id="cpfBeneficiario" placeholder="Ex: 12345678901" maxlength="11" required>
+                        <div class="invalid-feedback">
+                            Por favor, insira um CPF válido com 11 dígitos.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="idBeneficiario" class="form-label">ID do Beneficiário</label>
+                        <input type="number" class="form-control" id="idBeneficiario" placeholder="Ex: 123" required>
+                        <div class="invalid-feedback">
+                            Por favor, insira um ID de beneficiário.
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="numeroDependentes" class="form-label">Número de Dependentes</label>
+                        <input type="number" class="form-control" id="numeroDependentes" min="0" value="0" required>
+                    </div>
+                    <div class="col-12 text-end mt-3">
+                        <button type="submit" class="btn btn-ong">Registrar Beneficiário</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card table-card">
+        <div class="card-body">
+            <h5 class="card-title">Lista de Beneficiários</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>CPF</th>
+                        <th>ID Beneficiário</th>
+                        <th>Número de Dependentes</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody id="beneficiariosBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let allBeneficiarios = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Para fins de teste, você pode simular um ID de ONG logada.
+        // Em um ambiente real, este valor viria da autenticação.
+        const idOngLogada = 1; // Substitua '1' pelo ID da ONG real se estiver testando com um backend.
+
+        carregarBeneficiarios(idOngLogada);
+
+        const formBeneficiario = document.getElementById('formBeneficiario');
+        formBeneficiario.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (!formBeneficiario.checkValidity()) {
+                formBeneficiario.classList.add('was-validated');
+                return;
+            }
+
+            const cpfBeneficiario = document.getElementById('cpfBeneficiario').value;
+            const idBeneficiario = parseInt(document.getElementById('idBeneficiario').value);
+            const numeroDependentes = parseInt(document.getElementById('numeroDependentes').value);
+
+            const novoBeneficiario = {
+                cpfBeneficiario: cpfBeneficiario,
+                idBeneficiario: idBeneficiario,
+                numeroDependentes: numeroDependentes
+            };
+
+            await registrarBeneficiario(novoBeneficiario, idOngLogada);
+        });
+    });
+
+    /**
+     * Atualiza os cartões de resumo com os dados totais de beneficiários e com dependentes.
+     * @param {Array} beneficiarios - Lista de beneficiários.
+     */
+    function atualizarCardsResumo(beneficiarios) {
+        document.getElementById('totalBeneficiarios').textContent = beneficiarios.length;
+        const comDependentes = beneficiarios.filter(b => b.numeroDependentes > 0).length;
+        document.getElementById('beneficiariosComDependentes').textContent = comDependentes;
+    }
+
+    /**
+     * Popula a tabela com os beneficiários.
+     * @param {Array} beneficiariosParaExibir - Lista de beneficiários a serem exibidos.
+     */
+    function popularTabela(beneficiariosParaExibir) {
+        const tbody = document.getElementById('beneficiariosBody');
+        tbody.innerHTML = '';
+
+        if (beneficiariosParaExibir.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum beneficiário encontrado.</td></tr>';
+            return;
+        }
+
+        beneficiariosParaExibir.forEach(beneficiario => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+        <td>${beneficiario.cpfBeneficiario}</td>
+        <td>${beneficiario.idBeneficiario}</td>
+        <td>${beneficiario.numeroDependentes}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger" onclick="excluirBeneficiario('${beneficiario.cpfBeneficiario}', ${beneficiario.idBeneficiario})">
+            <i class="bi bi-trash"></i> Excluir
+          </button>
+        </td>
+      `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /**
+     * Carrega os beneficiários da API e os exibe.
+     */
+    async function carregarBeneficiarios(idOng) {
+        try {
+            // Exemplo de URL para sua API de beneficiários. Você precisará ajustar isso.
+            const resposta = await fetch(`/api/beneficiarios?idOng=${idOng}`);
+            const dados = await resposta.json();
+
+            if (!dados.success) {
+                console.error('Erro ao carregar beneficiários:', dados.message || 'Erro desconhecido.');
+                allBeneficiarios = []; // Clear data on error
+            } else {
+                allBeneficiarios = dados.beneficiarios || [];
+            }
+
+            popularTabela(allBeneficiarios);
+            atualizarCardsResumo(allBeneficiarios);
+
+        } catch (error) {
+            console.error('Erro de comunicação ao carregar beneficiários.', error);
+            allBeneficiarios = []; // Clear data on communication error
+            popularTabela([]); // Clear table
+            atualizarCardsResumo([]); // Reset summary cards
+            alert('Erro ao carregar beneficiários. Verifique a conexão ou a API.');
+        }
+    }
+
+    /**
+     * Registra um novo beneficiário via API.
+     * @param {object} beneficiarioData - Dados do beneficiário a ser registrado.
+     * @param {number} idOng - ID da ONG associada.
+     */
+    async function registrarBeneficiario(beneficiarioData, idOng) {
+        try {
+            const resposta = await fetch('/api/beneficiarios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ...beneficiarioData, idOng: idOng }) // Inclui idOng na requisição
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                alert('Beneficiário registrado com sucesso!');
+                document.getElementById('formBeneficiario').reset(); // Limpa o formulário
+                document.getElementById('formBeneficiario').classList.remove('was-validated'); // Remove validação
+                carregarBeneficiarios(idOng); // Recarrega a lista
+            } else {
+                alert(`Erro ao registrar beneficiário: ${dados.message || 'Erro desconhecido.'}`);
+                console.error('Erro ao registrar beneficiário:', dados.message);
+            }
+        } catch (error) {
+            console.error('Erro de comunicação ao registrar beneficiário.', error);
+            alert('Erro de comunicação ao registrar beneficiário. Verifique a conexão.');
+        }
+    }
+
+    /**
+     * Exclui um beneficiário via API.
+     * @param {string} cpf - CPF do beneficiário a ser excluído.
+     * @param {number} id - ID do beneficiário a ser excluído.
+     */
+    async function excluirBeneficiario(cpf, id) {
+        if (!confirm(`Tem certeza que deseja excluir o beneficiário CPF: ${cpf}, ID: ${id}?`)) {
+            return;
+        }
+
+        try {
+            const resposta = await fetch(`/api/beneficiarios?cpfBeneficiario=${cpf}&idBeneficiario=${id}`, {
+                method: 'DELETE'
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                alert('Beneficiário excluído com sucesso!');
+                // Para fins de demonstração, podemos recarregar todos os beneficiários.
+                // Em um app real, você pode remover o item da array `allBeneficiarios` e repopular a tabela.
+                carregarBeneficiarios(1); // Substitua 1 pelo idOngLogada real
+            } else {
+                alert(`Erro ao excluir beneficiário: ${dados.message || 'Erro desconhecido.'}`);
+                console.error('Erro ao excluir beneficiário:', dados.message);
+            }
+        } catch (error) {
+            console.error('Erro de comunicação ao excluir beneficiário.', error);
+            alert('Erro de comunicação ao excluir beneficiário. Verifique a conexão.');
+        }
+    }
+
+    // Validação de CPF para ter 11 dígitos
+    document.getElementById('cpfBeneficiario').addEventListener('input', function() {
+        const cpfInput = this;
+        if (cpfInput.value.length !== 11) {
+            cpfInput.setCustomValidity('O CPF deve ter exatamente 11 dígitos.');
+        } else {
+            cpfInput.setCustomValidity('');
+        }
+    });
+
+</script>
+</body>
+</html>
