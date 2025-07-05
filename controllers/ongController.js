@@ -145,3 +145,43 @@ export const confirmarColeta = (req, res) => {
         });
     });
 };
+
+/**
+ * Lista as doações que uma ONG específica venceu e que estão aguardando a coleta.
+ * Rota: GET /api/ong/coletas-pendentes
+ */
+export const listarColetasPendentes = (req, res) => {
+    // Pega o ID da ONG logada da query string
+    const { idOng } = req.query;
+
+    if (!idOng) {
+        return res.status(400).json({ success: false, message: "O ID da ONG é obrigatório." });
+    }
+
+    // Consulta que busca as doações que estão 'Aguardando Coleta' E
+    // onde a reivindicação vencedora pertence à ONG logada.
+    const sql = `
+        SELECT 
+            d.idDoacao,
+            d.dataColeta, -- O prazo final para a coleta
+            d.horaColeta, -- A hora final para a coleta
+            a.nomeAlimento,
+            u.nome AS nomeDoador,
+            r.idReivindicacao -- O ID da reivindicação para usar no botão de confirmação
+        FROM Doacao d
+            JOIN Reivindicacao r ON d.fk_reivindicacao_id = r.idReivindicacao
+            JOIN Alimento a ON d.idDoacao = a.fk_doacao_id
+            JOIN Doador doador ON d.fk_doador_id = doador.idDoador
+            JOIN Usuario u ON doador.fk_usuario_id = u.id_usuario
+        WHERE d.statusDoacao = 'Aguardando Coleta' AND r.fk_ong_id = ?
+            ORDER BY d.dataColeta ASC;
+        `;
+
+    conexao.query(sql, [idOng], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar coletas pendentes:", erro);
+            return res.status(500).json({ success: false, error: erro });
+        }
+        return res.status(200).json({ success: true, coletas: resultados });
+    });
+};
