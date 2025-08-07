@@ -4,7 +4,7 @@
 
 ## 📄 Sobre o Projeto
 
-O **FoodShareTech** é uma plataforma web completa desenvolvida como um projeto acadêmico para a disciplina de Banco de Dados II. [cite_start]A solução visa criar uma ponte tecnológica entre empresas doadoras de alimentos e ONGs, com o objetivo de otimizar a logística de doações, reduzir o desperdício e combater a insegurança alimentar[cite: 35, 65, 79].
+O **FoodShareTech** é uma plataforma web completa desenvolvida como um projeto acadêmico para a disciplina de Banco de Dados II. [cite_start]A solução visa criar uma ponte tecnológica entre empresas doadoras de alimentos e ONGs, com o objetivo de otimizar a logística de doações, reduzir o desperdício e combater a insegurança alimentar.
 
 O sistema permite que empresas cadastrem doações, que ficam disponíveis para que ONGs possam reivindicá-las através de um sistema de "lances". Um processo automatizado no banco de dados elege a ONG vencedora com base em uma pontuação de prioridade, garantindo um processo justo e transparente.
 
