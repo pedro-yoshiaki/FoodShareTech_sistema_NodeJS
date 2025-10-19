@@ -124,5 +124,5 @@ Siga os passos abaixo para configurar e rodar o projeto em seu ambiente local.
 
 ## 👥 Autores
 
-* [cite_start]**Matheus Soares Nascimento** [cite: 4, 9]
-* [cite_start]**Pedro Yoshiaki Freitas Nohara** [cite: 5, 9]
+* **Matheus Soares Nascimento** 
+* **Pedro Yoshiaki Freitas Nohara**
